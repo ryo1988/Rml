@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Globalization;
 using System.Reflection;
 
 namespace Rml
@@ -17,7 +18,16 @@ namespace Rml
             : base(type)
         {
         }
-        public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="culture"></param>
+        /// <param name="value"></param>
+        /// <param name="destinationType"></param>
+        /// <returns></returns>
+        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
             if (destinationType == typeof(string))
             {
@@ -35,6 +45,31 @@ namespace Rml
             }
 
             return base.ConvertTo(context, culture, value, destinationType);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="culture"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        {
+            if (value is string)
+            {
+                var description = (string)value;
+                foreach (var fi in EnumType.GetFields())
+                {
+                    var attributes = (DescriptionAttribute[])fi.GetCustomAttributes(typeof(DescriptionAttribute), false);
+                    if (attributes.Length > 0 && attributes[0].Description == description)
+                        return fi.GetValue(fi.Name);
+                    if (fi.Name == description)
+                        return fi.GetValue(fi.Name);
+                }
+            }
+
+            return base.ConvertFrom(context, culture, value);
         }
     }
 }
