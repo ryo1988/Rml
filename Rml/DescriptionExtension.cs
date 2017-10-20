@@ -20,6 +20,19 @@ namespace Rml
         public static string GetDescription<TSource, TProperty>(this TSource source,
             Expression<Func<TSource, TProperty>> propertyExpression)
         {
+            return GetDescription(propertyExpression);
+        }
+
+        /// <summary>
+        /// <see cref="DescriptionAttribute.Description"/>を取得します
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <typeparam name="TProperty"></typeparam>
+        /// <param name="propertyExpression"></param>
+        /// <returns></returns>
+        public static string GetDescription<TSource, TProperty>(
+            this Expression<Func<TSource, TProperty>> propertyExpression)
+        {
             if (propertyExpression == null)
                 throw new ArgumentNullException(nameof(propertyExpression));
 
