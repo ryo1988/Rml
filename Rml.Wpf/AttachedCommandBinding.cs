@@ -40,6 +40,8 @@ namespace Rml.Wpf
         {
             if (!(sender is UIElement element)) return;
 
+            element.CommandBindings.Clear();
+
             if (e.NewValue is CommandBindingCollection bindings)
             {
                 element.CommandBindings.AddRange(bindings);
