@@ -8,11 +8,12 @@
     <Description>Rml</Description>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
-    <Version>0.0.0.1</Version>
+    <Version>0.1.0.0</Version>
     <PackageLicenseUrl>https://github.com/ryo1988/Rml/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/ryo1988/Rml</PackageProjectUrl>
-    <Product />
-    <Copyright>Copyright (c) ryo1988</Copyright>
+    <Product>Rml</Product>
+    <Copyright>Copyright (c) 2017 ryo1988</Copyright>
+    <PackageId>Rml</PackageId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

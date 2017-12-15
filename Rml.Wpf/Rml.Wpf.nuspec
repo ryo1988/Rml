@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Rml.Wpf</id>
-    <version>0.0.0</version>
+    <version>0.1.0.0</version>
     <title>Rml.Wpf</title>
     <authors>ryo1988</authors>
     <owners>ryo1988</owners>
@@ -12,5 +12,6 @@
     <description>Rml.Wpf</description>
     <releaseNotes></releaseNotes>
     <tags>WPF</tags>
+    <copyright>Copyright (c) 2017 ryo1988</copyright>
   </metadata>
 </package>
