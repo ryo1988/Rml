@@ -7,7 +7,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Reactive.Bindings.Extensions;
 
-namespace Rml.Wpf
+namespace Rml
 {
     /// <summary>
     /// 
