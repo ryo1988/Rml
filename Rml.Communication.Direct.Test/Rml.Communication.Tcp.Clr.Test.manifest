@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
+
+  <dependency>
+    <dependentAssembly>
+      <assemblyIdentity name="Rml.Communication.Tcp.Clr" version="1.0.0.0" type="win32"/>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly>
+      <assemblyIdentity name="Rml.RedirectLoadAssemblyFolder.Clr" version="1.0.0.0" type="win32"/>
+    </dependentAssembly>
+  </dependency>
+  
+</assembly>
