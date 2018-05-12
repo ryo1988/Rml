@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rml.Communication.Direct.Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rml.Communication.Tcp.Test", "Rml.Communication.Tcp.Test\Rml.Communication.Tcp.Test.csproj", "{BC0B0E17-3F8D-4179-8D47-C41924929BD4}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rml.RedirectLoadAssemblyFolder", "Rml.RedirectLoadAssemblyFolder\Rml.RedirectLoadAssemblyFolder.csproj", "{2CE7C6BB-C5BA-4F35-BF8C-CEAA87CFAAD1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{BC0B0E17-3F8D-4179-8D47-C41924929BD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BC0B0E17-3F8D-4179-8D47-C41924929BD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BC0B0E17-3F8D-4179-8D47-C41924929BD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CE7C6BB-C5BA-4F35-BF8C-CEAA87CFAAD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CE7C6BB-C5BA-4F35-BF8C-CEAA87CFAAD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CE7C6BB-C5BA-4F35-BF8C-CEAA87CFAAD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CE7C6BB-C5BA-4F35-BF8C-CEAA87CFAAD1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
