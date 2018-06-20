@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
+
+<assemblyIdentity name="Rml.Communication.Tcp.Clr" version="1.0.0.0" type="win32"/>
+  
+<dependency>
+  <dependentAssembly>
+    <assemblyIdentity name="Rml.Communication.Clr" version="1.0.0.0" type="win32"/>
+  </dependentAssembly>
+</dependency>
+
+<file name="Rml.Communication.Tcp.Clr.dll"/>
+
+</assembly>
