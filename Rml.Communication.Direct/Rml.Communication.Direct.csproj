@@ -2,6 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Copyright>Copyright (c) 2017 ryo1988</Copyright>
+    <Authors>ryo1988</Authors>
+    <PackageProjectUrl>https://github.com/ryo1988/Rml</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/ryo1988/Rml/blob/master/LICENSE</PackageLicenseUrl>
+    <Version>0.1.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

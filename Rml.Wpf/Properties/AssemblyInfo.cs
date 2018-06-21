@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Rml.Wpf")]
-[assembly: AssemblyCopyright("Copyright (c) ryo1988")]
+[assembly: AssemblyCopyright("Copyright (c) 2017 ryo1988")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
