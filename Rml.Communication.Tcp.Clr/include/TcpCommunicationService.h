@@ -23,17 +23,17 @@ class RMLCOMMUNICATIONTCPCLRDLL_API TcpCommunicationService : public Communicati
 public:
     TcpCommunicationService();
 
-    ~TcpCommunicationService() override;
+    virtual ~TcpCommunicationService();
 
-    bool Send(void* buffer, int size) override;
+    virtual bool Send(void* buffer, int size) override;
 
-    void SetReceiveCallback(Communication::Clr::ReceiveCallback receiveCallback) override;
+    virtual void SetReceiveCallback(Communication::Clr::ReceiveCallback receiveCallback) override;
 
-    void SetReceiveCallback(std::function<void(void*,int)> receiveCallback) override;
+    virtual void SetReceiveCallback(std::function<void(void*,int)> receiveCallback) override;
 
-    int GetConnectCount() override;
+    virtual int GetConnectCount() override;
 
-    void* GetInstance() override;
+    virtual void* GetInstance() override;
 
     bool StartListener(const char* ipAddress, int port);
 

@@ -39,17 +39,17 @@ class RMLCOMMUNICATIONCLRDLL_API CommunicationServiceBase : public ICommunicatio
 public:
     CommunicationServiceBase(void* instance);
 
-    ~CommunicationServiceBase() override;
+    virtual ~CommunicationServiceBase();
 
-    bool Send(void* buffer, int size) override;
+    virtual bool Send(void* buffer, int size) override;
 
-    void SetReceiveCallback(ReceiveCallback receiveCallback) override;
+    virtual void SetReceiveCallback(ReceiveCallback receiveCallback) override;
 
-    void SetReceiveCallback(std::function<void(void*,int)> receiveCallback) override;
+    virtual void SetReceiveCallback(std::function<void(void*,int)> receiveCallback) override;
 
-    int GetConnectCount() override;
+    virtual int GetConnectCount() override;
 
-    void* GetInstance() override;
+    virtual void* GetInstance() override;
 
 private:
     void* _instance;
