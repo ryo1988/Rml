@@ -6,12 +6,12 @@ namespace Rml.RedirectLoadAssemblyFolder
 {
     public class RedirectLoadAssemblyFolder
     {
-        public void Redirect(string folderPath)
+        public static void Redirect(string folderPath)
         {
             AttachHandler(folderPath);
         }
 
-        public void RedirectExecutingAssemblyFolder()
+        public static void RedirectExecutingAssemblyFolder()
         {
             var assembly = Assembly.GetExecutingAssembly();
             var folderPath = Path.GetDirectoryName(assembly.Location);
