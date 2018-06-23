@@ -18,6 +18,8 @@ namespace Direct
 namespace Clr
 {
 
+class DirectCommunicationServiceImpl;
+
 class RMLCOMMUNICATIONDIRECTCLRDLL_API DirectCommunicationService : public Communication::Clr::ICommunicationService
 {
 public:
@@ -27,9 +29,7 @@ public:
 
     bool Send(void* buffer, int size) override;
 
-    void SetReceiveCallback(Communication::Clr::ReceiveCallback receiveCallback) override;
-
-    void SetReceiveCallback(std::function<void(void*,int)> receiveCallback) override;
+    void SetReceiveCallback(Communication::Clr::IReceiveCallback* receiveCallback) override;
 
     int GetConnectCount() override;
 
@@ -38,7 +38,7 @@ public:
     void SetTarget(DirectCommunicationService* target);
 
 private:
-    Communication::Clr::CommunicationServiceBase _base;
+    DirectCommunicationServiceImpl* _impl;
 };
 
 }

@@ -18,6 +18,8 @@ namespace Tcp
 namespace Clr
 {
 
+class TcpCommunicationServiceImpl;
+
 class RMLCOMMUNICATIONTCPCLRDLL_API TcpCommunicationService : public Communication::Clr::ICommunicationService
 {
 public:
@@ -27,9 +29,7 @@ public:
 
     virtual bool Send(void* buffer, int size) override;
 
-    virtual void SetReceiveCallback(Communication::Clr::ReceiveCallback receiveCallback) override;
-
-    virtual void SetReceiveCallback(std::function<void(void*,int)> receiveCallback) override;
+    virtual void SetReceiveCallback(Communication::Clr::IReceiveCallback* receiveCallback) override;
 
     virtual int GetConnectCount() override;
 
@@ -40,7 +40,7 @@ public:
     bool StartClient(const char* hostName, int port);
 
 private:
-    Communication::Clr::CommunicationServiceBase _base;
+    TcpCommunicationServiceImpl* _impl;
 };
 
 }

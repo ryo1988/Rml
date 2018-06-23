@@ -6,6 +6,7 @@
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace Rml::Communication::Tcp::Clr;
+using namespace Rml::Communication::Clr;
 
 namespace RmlCommunicationTcpClrTest
 {		
@@ -35,22 +36,22 @@ namespace RmlCommunicationTcpClrTest
             auto recvB = false;
             auto recvedA = false;
             auto recvedB = false;
-            a->SetReceiveCallback([&data,&recvA,&recvedA](void* buffer, int size)
+            a->SetReceiveCallback(ReceiveCallback::Create([&data,&recvA,&recvedA](void* buffer, int size)
             {
                 if (memcmp(buffer, data, size) == 0)
                 {
                     recvA = true;
                 }
                 recvedA = true;
-            });
-            b->SetReceiveCallback([&data,&recvB,&recvedB](void* buffer, int size)
+            }));
+            b->SetReceiveCallback(ReceiveCallback::Create([&data,&recvB,&recvedB](void* buffer, int size)
             {
                 if (memcmp(buffer, data, size) == 0)
                 {
                     recvB = true;
                 }
                 recvedB = true;
-            });
+            }));
 
             a->Send(data, 2);
             b->Send(data, 2);

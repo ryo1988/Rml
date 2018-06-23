@@ -15,51 +15,67 @@ namespace Direct
 namespace Clr
 {
 
-void* CreateInstance()
+gcroot<Direct::DirectCommunicationService^>* CreateInstance()
 {
     auto instance = gcnew Direct::DirectCommunicationService();
     return new gcroot<Direct::DirectCommunicationService^>(instance);
 }
 
+class DirectCommunicationServiceImpl
+{
+    friend class DirectCommunicationService;
+
+public:
+    DirectCommunicationServiceImpl()
+        : _instance(CreateInstance())
+        , _base(new Rml::Communication::Clr::CommunicationServiceBase(_instance))
+    {
+    }
+
+    ~DirectCommunicationServiceImpl()
+    {
+        delete _base;
+        delete _instance;
+    }
+
+private:
+    gcroot<Direct::DirectCommunicationService^>* _instance;
+    Rml::Communication::Clr::CommunicationServiceBase* _base;
+};
+
 DirectCommunicationService::DirectCommunicationService()
-    : _base(CreateInstance())
+    : _impl(new DirectCommunicationServiceImpl())
 {
 }
 
 DirectCommunicationService::~DirectCommunicationService()
 {
+    delete _impl;
 }
 
 bool DirectCommunicationService::Send(void* buffer, int size)
 {
-    return _base.Send(buffer, size);
+    return _impl->_base->Send(buffer, size);
 }
 
-void DirectCommunicationService::SetReceiveCallback(Communication::Clr::ReceiveCallback receiveCallback)
+void DirectCommunicationService::SetReceiveCallback(Communication::Clr::IReceiveCallback* receiveCallback)
 {
-    _base.SetReceiveCallback(receiveCallback);
-}
-
-void DirectCommunicationService::SetReceiveCallback(std::function<void(void*,int)> receiveCallback)
-{
-    _base.SetReceiveCallback(receiveCallback);
+    _impl->_base->SetReceiveCallback(receiveCallback);
 }
 
 int DirectCommunicationService::GetConnectCount()
 {
-    return _base.GetConnectCount();
+    return _impl->_base->GetConnectCount();
 }
 
 void* DirectCommunicationService::GetInstance()
 {
-    return _base.GetInstance();
+    return _impl->_base->GetInstance();
 }
 
 void DirectCommunicationService::SetTarget(DirectCommunicationService* target)
 {
-    auto instancePtr = static_cast<gcroot<Direct::DirectCommunicationService^>*>(_base.GetInstance());
-    auto targetInstancePtr = static_cast<gcroot<Direct::DirectCommunicationService^>*>(target->_base.GetInstance());
-    (*instancePtr)->SetTarget(*targetInstancePtr);
+    (*_impl->_instance)->SetTarget(*target->_impl->_instance);
 }
 
 }

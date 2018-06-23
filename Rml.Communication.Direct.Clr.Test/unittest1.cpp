@@ -6,6 +6,7 @@
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace Rml::Communication::Direct::Clr;
+using namespace Rml::Communication::Clr;
 
 namespace RmlCommunicationDirectClrTest
 {		
@@ -27,20 +28,20 @@ namespace RmlCommunicationDirectClrTest
             a->SetTarget(b);
             auto recvA = false;
             auto recvB = false;
-            a->SetReceiveCallback([&data,&recvA](void* buffer, int size)
+            a->SetReceiveCallback(ReceiveCallback::Create([&data,&recvA](void* buffer, int size)
             {
                 if (memcmp(buffer, data, size) == 0)
                 {
                     recvA = true;
                 }
-            });
-            b->SetReceiveCallback([&data,&recvB](void* buffer, int size)
+            }));
+            b->SetReceiveCallback(ReceiveCallback::Create([&data,&recvB](void* buffer, int size)
             {
                 if (memcmp(buffer, data, size) == 0)
                 {
                     recvB = true;
                 }
-            });
+            }));
 
             a->Send(data, 2);
             b->Send(data, 2);

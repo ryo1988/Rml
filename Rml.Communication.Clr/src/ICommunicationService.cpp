@@ -13,10 +13,6 @@ namespace Communication
 namespace Clr
 {
 
-ICommunicationService::ICommunicationService()
-{
-}
-
 ICommunicationService::~ICommunicationService()
 {
 }
@@ -26,7 +22,7 @@ ref class ReceiveEventReceiver
 public:
     void Hnadler(System::Object^ sender, ReceiveEventArgs^ args)
     {
-        if (_receiveCallback == nullptr && _receiveCallbackFunc == nullptr)
+        if (_receiveCallback == nullptr)
         {
             return;
         }
@@ -35,84 +31,71 @@ public:
         unsigned char* ptr = buffetPtr;
         if (_receiveCallback)
         {
-            _receiveCallback(reinterpret_cast<char*>(ptr), args->Buffer->Length);
-        }
-        if (_receiveCallbackFunc)
-        {
-            (*_receiveCallbackFunc)(reinterpret_cast<char*>(ptr), args->Buffer->Length);
+            _receiveCallback->Execute(reinterpret_cast<char*>(ptr), args->Buffer->Length);
         }
     }
 
-    void SetRecvCallback(ReceiveCallback receiveCallback)
+    void SetRecvCallback(IReceiveCallback* receiveCallback)
     {
         _receiveCallback = receiveCallback;
-        _receiveCallbackFunc = nullptr;
-    }
-
-    void SetRecvCallback(std::function<void(void*,int)>* receiveCallback)
-    {
-        _receiveCallback = nullptr;
-        _receiveCallbackFunc = receiveCallback;
     }
 
 private:
-    ReceiveCallback _receiveCallback;
-    std::function<void(void*,int)>* _receiveCallbackFunc;
+    IReceiveCallback* _receiveCallback;
+};
+
+class CommunicationServiceBaseImpl
+{
+    friend class CommunicationServiceBase;
+private:
+    gcroot<Communication::ICommunicationService^>* _instance;
+    gcroot<ReceiveEventReceiver^>* _receiveEventReceiver;
+    IReceiveCallback* _receiveCallback;
+    gcroot<EventHandler<ReceiveEventArgs^>^>* _eventHandler;
 };
 
 CommunicationServiceBase::CommunicationServiceBase(void* instance)
-    : _instance(instance)
-    , _receiveEventReceiver(nullptr)
+    : _impl(new CommunicationServiceBaseImpl())
 {
-    auto instancePtr = static_cast<gcroot<Communication::ICommunicationService^>*>(_instance);
+    _impl->_instance = static_cast<gcroot<Communication::ICommunicationService^>*>(instance);
 
     auto receiveEventReceiver = gcnew ReceiveEventReceiver();
-    _receiveEventReceiver = new gcroot<ReceiveEventReceiver^>(receiveEventReceiver);
+    _impl->_receiveEventReceiver = new gcroot<ReceiveEventReceiver^>(receiveEventReceiver);
 
-    (*instancePtr)->Receive += gcnew EventHandler<ReceiveEventArgs^>(receiveEventReceiver, &ReceiveEventReceiver::Hnadler);
+    auto eventHandler = gcnew EventHandler<ReceiveEventArgs^>(receiveEventReceiver, &ReceiveEventReceiver::Hnadler);
+    _impl->_eventHandler = new gcroot<EventHandler<ReceiveEventArgs^>^>(eventHandler);
+    (*_impl->_instance)->Receive += *_impl->_eventHandler;
 }
 
 CommunicationServiceBase::~CommunicationServiceBase()
 {
-    if (_instance != nullptr)
-    {
-        auto instancePtr = static_cast<gcroot<Communication::ICommunicationService^>*>(_instance);
-        delete instancePtr;
-        _instance = nullptr;
-    }
+    (*_impl->_instance)->Receive -= *_impl->_eventHandler;
+    _impl->_receiveCallback->Destroy();
+    delete _impl->_receiveEventReceiver;
+    delete _impl;
 }
 
 bool CommunicationServiceBase::Send(void* buffer, int size)
 {
-    auto instancePtr = static_cast<gcroot<Communication::ICommunicationService^>*>(_instance);
-
     auto bufferTemp = gcnew array<Byte>(size);
     Marshal::Copy((IntPtr)buffer, bufferTemp, 0, size);
-    return (*instancePtr)->Send(bufferTemp);
+    return (*_impl->_instance)->Send(bufferTemp);
 }
 
-void CommunicationServiceBase::SetReceiveCallback(ReceiveCallback receiveCallback)
+void CommunicationServiceBase::SetReceiveCallback(IReceiveCallback* receiveCallback)
 {
-    auto recvEventReceiverPtr = static_cast<gcroot<ReceiveEventReceiver^>*>(_receiveEventReceiver);
-    (*recvEventReceiverPtr)->SetRecvCallback(receiveCallback);
-}
-
-void CommunicationServiceBase::SetReceiveCallback(std::function<void(void*,int)> receiveCallback)
-{
-    _receiveCallbackFunc = receiveCallback;
-    auto recvEventReceiverPtr = static_cast<gcroot<ReceiveEventReceiver^>*>(_receiveEventReceiver);
-    (*recvEventReceiverPtr)->SetRecvCallback(&_receiveCallbackFunc);
+    _impl->_receiveCallback = receiveCallback;
+    (*_impl->_receiveEventReceiver)->SetRecvCallback(_impl->_receiveCallback);
 }
 
 int CommunicationServiceBase::GetConnectCount()
 {
-    auto instancePtr = static_cast<gcroot<Communication::ICommunicationService^>*>(_instance);
-    return (*instancePtr)->GetConnectCount();
+    return (*_impl->_instance)->GetConnectCount();
 }
 
 void* CommunicationServiceBase::GetInstance()
 {
-    return _instance;
+    return _impl->_instance;
 }
 
 }
