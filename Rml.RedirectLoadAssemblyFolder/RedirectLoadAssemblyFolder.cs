@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using System.Collections.Generic;
 
 namespace Rml.RedirectLoadAssemblyFolder
 {
@@ -20,10 +21,17 @@ namespace Rml.RedirectLoadAssemblyFolder
 
         private static void AttachHandler(string folderPath)
         {
+            var files = Directory.GetFiles(folderPath, "*.dll", SearchOption.AllDirectories);
+            var haveAssembly = new HashSet<string>(files);
+
             AppDomain.CurrentDomain.AssemblyResolve += (s, e) =>
             {
-                var info = e.Name.Split(',');
-                var path = Path.Combine(folderPath, info[0] + ".dll");
+                var assemblyName = new AssemblyName(e.Name);
+                var path = Path.Combine(folderPath, assemblyName.Name + ".dll");
+                if (haveAssembly.Contains(path) == false)
+                {
+                    return null;
+                }
 
                 try
                 {
