@@ -107,6 +107,7 @@
   <ItemGroup>
     <Compile Include="AttachedCommandBinding.cs" />
     <Compile Include="Behavior\ListViewSelectedItemsBehavior.cs" />
+    <Compile Include="Behavior\WindowClosedBehavior.cs" />
     <Compile Include="Behavior\WindowClosingBehavior.cs" />
     <Compile Include="Interactivity\InteractionRequest\AsyncInteractionRequest.cs" />
     <Compile Include="Behavior\DataGridSelectedItemBehavior.cs" />

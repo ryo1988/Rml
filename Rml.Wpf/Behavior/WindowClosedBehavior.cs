@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+﻿using System;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interactivity;
@@ -8,21 +8,21 @@ namespace Rml.Wpf.Behavior
     /// <summary>
     /// 
     /// </summary>
-    public class WindowClosingBehavior : Behavior<FrameworkElement>
+    public class WindowClosedBehavior : Behavior<FrameworkElement>
     {
         /// <summary>
         /// 
         /// </summary>
-        public static readonly DependencyProperty ClosingProperty = DependencyProperty.Register(
-            "Closing", typeof(ICommand), typeof(WindowClosingBehavior), new PropertyMetadata(default(ICommand)));
+        public static readonly DependencyProperty ClosedProperty = DependencyProperty.Register(
+            "Closed", typeof(ICommand), typeof(WindowClosedBehavior), new PropertyMetadata(default(ICommand)));
 
         /// <summary>
         /// 
         /// </summary>
-        public ICommand Closing
+        public ICommand Closed
         {
-            get { return (ICommand) GetValue(ClosingProperty); }
-            set { SetValue(ClosingProperty, value); }
+            get { return (ICommand) GetValue(ClosedProperty); }
+            set { SetValue(ClosedProperty, value); }
         }
 
         private Window _window;
@@ -38,37 +38,37 @@ namespace Rml.Wpf.Behavior
 
         private void AssociatedObjectOnLoaded(object sender, RoutedEventArgs e)
         {
-            DetachClosing();
+            DetachClosed();
 
             if (_window == null)
             {
                 return;
             }
-            _window.Closing += WindowOnClosing;
+            _window.Closed += WindowOnClosed;
         }
 
         private void AssociatedObjectOnUnloaded(object sender, RoutedEventArgs e)
         {
-            DetachClosing();
+            DetachClosed();
         }
 
-        private void WindowOnClosing(object sender, CancelEventArgs args)
+        private void WindowOnClosed(object sender, EventArgs args)
         {
-            if (Closing == null)
+            if (Closed == null)
             {
                 return;
             }
-            if (Closing.CanExecute(args))
+            if (Closed.CanExecute(args))
             {
-                Closing.Execute(args);
+                Closed.Execute(args);
             }
         }
 
-        private void DetachClosing()
+        private void DetachClosed()
         {
             if (_window != null)
             {
-                _window.Closing -= WindowOnClosing;
+                _window.Closed -= WindowOnClosed;
             }
 
             _window = null;
@@ -77,7 +77,7 @@ namespace Rml.Wpf.Behavior
         /// <inheritdoc />
         protected override void OnDetaching()
         {
-            DetachClosing();
+            DetachClosed();
 
             AssociatedObject.Unloaded -= AssociatedObjectOnUnloaded;
             AssociatedObject.Loaded -= AssociatedObjectOnLoaded;
