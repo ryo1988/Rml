@@ -40,6 +40,7 @@ namespace Rml.Wpf.Behavior
         {
             DetachClosed();
 
+            _window = AssociatedObject as Window ?? Window.GetWindow(AssociatedObject);
             if (_window == null)
             {
                 return;
