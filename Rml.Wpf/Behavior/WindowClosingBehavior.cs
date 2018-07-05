@@ -33,7 +33,6 @@ namespace Rml.Wpf.Behavior
             base.OnAttached();
 
             AssociatedObject.Loaded += AssociatedObjectOnLoaded;
-            AssociatedObject.Unloaded += AssociatedObjectOnUnloaded;
         }
 
         private void AssociatedObjectOnLoaded(object sender, RoutedEventArgs e)
@@ -46,11 +45,6 @@ namespace Rml.Wpf.Behavior
                 return;
             }
             _window.Closing += WindowOnClosing;
-        }
-
-        private void AssociatedObjectOnUnloaded(object sender, RoutedEventArgs e)
-        {
-            DetachClosing();
         }
 
         private void WindowOnClosing(object sender, CancelEventArgs args)
@@ -80,7 +74,6 @@ namespace Rml.Wpf.Behavior
         {
             DetachClosing();
 
-            AssociatedObject.Unloaded -= AssociatedObjectOnUnloaded;
             AssociatedObject.Loaded -= AssociatedObjectOnLoaded;
 
             base.OnDetaching();
