@@ -56,6 +56,46 @@ private:
     std::function<void(void*, int)> _receiveCallback;
 };
 
+class ILogedCallback
+{
+public:
+    virtual ~ILogedCallback()
+    {
+    };
+
+    virtual void Destroy() = 0;
+    virtual void Execute(const char* buffer, size_t size) const = 0;
+};
+
+class LogedCallback : public ILogedCallback
+{
+public:
+    static LogedCallback* Create(const std::function<void(const char*, size_t)> receiveCallback)
+    {
+        return new LogedCallback(receiveCallback);
+    }
+
+private:
+    explicit LogedCallback(std::function<void(const char*, size_t)> receiveCallback)
+        : _logedCallback(std::move(receiveCallback))
+    {
+    }
+
+public:
+    virtual void Destroy() override
+    {
+        delete this;
+    }
+
+    virtual void Execute(const char* buffer, size_t size) const override
+    {
+        _logedCallback(buffer, size);
+    }
+
+private:
+    std::function<void(const char*, size_t)> _logedCallback;
+};
+
 class RMLCOMMUNICATIONCLRDLL_API ICommunicationService
 {
 public:
@@ -64,6 +104,8 @@ public:
     virtual bool Send(void* buffer, int size) = 0;
 
     virtual void SetReceiveCallback(IReceiveCallback* receiveCallback) = 0;
+
+    virtual void SetLogedCallback(ILogedCallback* logedCallback) = 0;
 
     virtual int GetConnectCount() = 0;
 
@@ -83,6 +125,8 @@ public:
     virtual bool Send(void* buffer, int size) override;
 
     virtual void SetReceiveCallback(IReceiveCallback* receiveCallback) override;
+
+    virtual void SetLogedCallback(ILogedCallback* logedCallback) override;
 
     virtual int GetConnectCount() override;
 

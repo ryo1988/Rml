@@ -25,15 +25,17 @@ class RMLCOMMUNICATIONDIRECTCLRDLL_API DirectCommunicationService : public Commu
 public:
     DirectCommunicationService();
 
-    ~DirectCommunicationService() override;
+    virtual ~DirectCommunicationService() override;
 
-    bool Send(void* buffer, int size) override;
+    virtual bool Send(void* buffer, int size) override;
 
-    void SetReceiveCallback(Communication::Clr::IReceiveCallback* receiveCallback) override;
+    virtual void SetReceiveCallback(Communication::Clr::IReceiveCallback* receiveCallback) override;
 
-    int GetConnectCount() override;
+    virtual void SetLogedCallback(Communication::Clr::ILogedCallback* logedCallback) override;
 
-    void* GetInstance() override;
+    virtual int GetConnectCount() override;
+
+    virtual void* GetInstance() override;
 
     void SetTarget(DirectCommunicationService* target);
 

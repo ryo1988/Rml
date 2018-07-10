@@ -31,6 +31,8 @@ public:
 
     virtual void SetReceiveCallback(Communication::Clr::IReceiveCallback* receiveCallback) override;
 
+    virtual void SetLogedCallback(Communication::Clr::ILogedCallback* logedCallback) override;
+
     virtual int GetConnectCount() override;
 
     virtual void* GetInstance() override;

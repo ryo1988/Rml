@@ -63,6 +63,11 @@ void DirectCommunicationService::SetReceiveCallback(Communication::Clr::IReceive
     _impl->_base->SetReceiveCallback(receiveCallback);
 }
 
+void DirectCommunicationService::SetLogedCallback(Communication::Clr::ILogedCallback* logedCallback)
+{
+    _impl->_base->SetLogedCallback(logedCallback);
+}
+
 int DirectCommunicationService::GetConnectCount()
 {
     return _impl->_base->GetConnectCount();

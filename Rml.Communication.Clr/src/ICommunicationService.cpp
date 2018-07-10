@@ -2,6 +2,11 @@
 #include "..\include\ICommunicationService.h"
 
 #include <vcclr.h>
+#include <msclr/marshal_cppstd.h>
+#include <msclr/marshal.h>
+#include <msclr/marshal_windows.h>
+#include <msclr/marshal_cppstd.h>
+#include <msclr/marshal_atl.h>
 
 using namespace System;  
 using namespace System::Runtime::InteropServices;
@@ -35,7 +40,7 @@ public:
         }
     }
 
-    void SetRecvCallback(IReceiveCallback* receiveCallback)
+    void SetCallback(IReceiveCallback* receiveCallback)
     {
         _receiveCallback = receiveCallback;
     }
@@ -44,14 +49,48 @@ private:
     IReceiveCallback* _receiveCallback;
 };
 
+ref class LogedEventReceiver
+{
+public:
+    void Hnadler(System::Object^ sender, LogEventArgs^ args)
+    {
+        if (_logedCallback == nullptr)
+        {
+            return;
+        }
+
+        auto context = gcnew msclr::interop::marshal_context;
+        auto str = context->marshal_as<std::string>(args->Log);
+        delete context;
+
+        if (_logedCallback)
+        {
+            _logedCallback->Execute(str.c_str(), str.size());
+        }
+    }
+
+    void SetCallback(ILogedCallback* logedeCallback)
+    {
+        _logedCallback = logedeCallback;
+    }
+
+private:
+    ILogedCallback* _logedCallback;
+};
+
 class CommunicationServiceBaseImpl
 {
     friend class CommunicationServiceBase;
 private:
     gcroot<Communication::ICommunicationService^>* _instance;
+
     gcroot<ReceiveEventReceiver^>* _receiveEventReceiver;
     IReceiveCallback* _receiveCallback;
-    gcroot<EventHandler<ReceiveEventArgs^>^>* _eventHandler;
+    gcroot<EventHandler<ReceiveEventArgs^>^>* _receiveEventHandler;
+
+    gcroot<LogedEventReceiver^>* _logedEventReceiver;
+    ILogedCallback* _logedCallback;
+    gcroot<EventHandler<LogEventArgs^>^>* _logedEventHandler;
 };
 
 CommunicationServiceBase::CommunicationServiceBase(void* instance)
@@ -59,19 +98,35 @@ CommunicationServiceBase::CommunicationServiceBase(void* instance)
 {
     _impl->_instance = static_cast<gcroot<Communication::ICommunicationService^>*>(instance);
 
-    auto receiveEventReceiver = gcnew ReceiveEventReceiver();
-    _impl->_receiveEventReceiver = new gcroot<ReceiveEventReceiver^>(receiveEventReceiver);
+    {
+        auto receiveEventReceiver = gcnew ReceiveEventReceiver();
+        _impl->_receiveEventReceiver = new gcroot<ReceiveEventReceiver^>(receiveEventReceiver);
 
-    auto eventHandler = gcnew EventHandler<ReceiveEventArgs^>(receiveEventReceiver, &ReceiveEventReceiver::Hnadler);
-    _impl->_eventHandler = new gcroot<EventHandler<ReceiveEventArgs^>^>(eventHandler);
-    (*_impl->_instance)->Receive += *_impl->_eventHandler;
+        auto eventHandler = gcnew EventHandler<ReceiveEventArgs^>(receiveEventReceiver, &ReceiveEventReceiver::Hnadler);
+        _impl->_receiveEventHandler = new gcroot<EventHandler<ReceiveEventArgs^>^>(eventHandler);
+        (*_impl->_instance)->Receive += *_impl->_receiveEventHandler;
+    }
+
+    {
+        auto logedEventReceiver = gcnew LogedEventReceiver();
+        _impl->_logedEventReceiver = new gcroot<LogedEventReceiver^>(logedEventReceiver);
+
+        auto eventHandler = gcnew EventHandler<LogEventArgs^>(logedEventReceiver, &LogedEventReceiver::Hnadler);
+        _impl->_logedEventHandler = new gcroot<EventHandler<LogEventArgs^>^>(eventHandler);
+        (*_impl->_instance)->Loged += *_impl->_logedEventHandler;
+    }
 }
 
 CommunicationServiceBase::~CommunicationServiceBase()
 {
-    (*_impl->_instance)->Receive -= *_impl->_eventHandler;
+    (*_impl->_instance)->Loged -= *_impl->_logedEventHandler;
+    _impl->_logedCallback->Destroy();
+    delete _impl->_logedEventReceiver;
+
+    (*_impl->_instance)->Receive -= *_impl->_receiveEventHandler;
     _impl->_receiveCallback->Destroy();
     delete _impl->_receiveEventReceiver;
+
     delete _impl;
 }
 
@@ -85,7 +140,13 @@ bool CommunicationServiceBase::Send(void* buffer, int size)
 void CommunicationServiceBase::SetReceiveCallback(IReceiveCallback* receiveCallback)
 {
     _impl->_receiveCallback = receiveCallback;
-    (*_impl->_receiveEventReceiver)->SetRecvCallback(_impl->_receiveCallback);
+    (*_impl->_receiveEventReceiver)->SetCallback(_impl->_receiveCallback);
+}
+
+void CommunicationServiceBase::SetLogedCallback(ILogedCallback* logedCallback)
+{
+    _impl->_logedCallback = logedCallback;
+    (*_impl->_logedEventReceiver)->SetCallback(_impl->_logedCallback);
 }
 
 int CommunicationServiceBase::GetConnectCount()

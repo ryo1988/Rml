@@ -7,6 +7,7 @@ namespace Rml.Communication.Direct
         private DirectCommunicationService _target;
 
         public event EventHandler<ReceiveEventArgs> Receive;
+        public event EventHandler<LogEventArgs> Loged;
 
         public bool Send(byte[] buffer)
         {

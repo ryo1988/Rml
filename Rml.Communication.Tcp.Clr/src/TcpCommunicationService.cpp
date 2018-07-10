@@ -65,6 +65,11 @@ void TcpCommunicationService::SetReceiveCallback(Communication::Clr::IReceiveCal
     _impl->_base->SetReceiveCallback(recvCallback);
 }
 
+void TcpCommunicationService::SetLogedCallback(Communication::Clr::ILogedCallback* logedCallback)
+{
+    _impl->_base->SetLogedCallback(logedCallback);
+}
+
 int TcpCommunicationService::GetConnectCount()
 {
     return _impl->_base->GetConnectCount();

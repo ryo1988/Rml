@@ -120,6 +120,7 @@ namespace Rml.Communication.Tcp
         private CompositeDisposable _cd;
 
         public event EventHandler<ReceiveEventArgs> Receive;
+        public event EventHandler<LogEventArgs> Loged;
 
         public bool Send(byte[] buffer)
         {
@@ -140,8 +141,17 @@ namespace Rml.Communication.Tcp
                 Body = buffer,
             };
 
-            stream
-                .ForEach(o => o.WriteMessage(message));
+            try
+            {
+                stream
+                    .ForEach(o => o.WriteMessage(message));
+            }
+            catch (Exception e)
+            {
+                Loged?.Invoke(this, new LogEventArgs(e.Message));
+                return false;
+            }
+            
             
             return true;
         }
@@ -162,7 +172,7 @@ namespace Rml.Communication.Tcp
             }
             catch (SocketException e)
             {
-                Console.WriteLine(e);
+                Loged?.Invoke(this, new LogEventArgs(e.Message));
                 return false;
             }
 
@@ -177,9 +187,9 @@ namespace Rml.Communication.Tcp
                     return Disposable.Empty;
                 })
                 .Repeat()
-                .Select(o => ReceiveMessage(o).Catch((IOException ex) =>
+                .Select(o => ReceiveMessage(o).Catch((IOException e) =>
                 {
-                    Console.WriteLine(ex);
+                    Loged?.Invoke(this, new LogEventArgs(e.Message));
                     return Observable.Empty<Message>();
                 }))
                 .Merge()
@@ -202,14 +212,14 @@ namespace Rml.Communication.Tcp
             }
             catch (SocketException e)
             {
-                Console.WriteLine(e);
+                Loged?.Invoke(this, new LogEventArgs(e.Message));
                 return false;
             }
 
             ReceiveMessage(tcpClient)
-                .Catch((IOException ex) =>
+                .Catch((IOException e) =>
                 {
-                    Console.WriteLine(ex);
+                    Loged?.Invoke(this, new LogEventArgs(e.Message));
                     return Observable.Empty<Message>();
                 })
                 .Subscribe()
