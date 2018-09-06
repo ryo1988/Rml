@@ -120,11 +120,17 @@ CommunicationServiceBase::CommunicationServiceBase(void* instance)
 CommunicationServiceBase::~CommunicationServiceBase()
 {
     (*_impl->_instance)->Loged -= *_impl->_logedEventHandler;
-    _impl->_logedCallback->Destroy();
+    if (_impl->_logedCallback != nullptr)
+    {
+        _impl->_logedCallback->Destroy();
+    }
     delete _impl->_logedEventReceiver;
 
     (*_impl->_instance)->Receive -= *_impl->_receiveEventHandler;
-    _impl->_receiveCallback->Destroy();
+    if (_impl->_receiveCallback != nullptr)
+    {
+        _impl->_receiveCallback->Destroy();
+    }
     delete _impl->_receiveEventReceiver;
 
     delete _impl;
