@@ -103,6 +103,7 @@
     <Compile Include="Behavior\ListViewSelectedItemsBehavior.cs" />
     <Compile Include="Behavior\WindowClosedBehavior.cs" />
     <Compile Include="Behavior\WindowClosingBehavior.cs" />
+    <Compile Include="Converter\EnumLabelConverter.cs" />
     <Compile Include="Interactivity\InteractionRequest\AsyncInteractionRequest.cs" />
     <Compile Include="Behavior\DataGridSelectedItemBehavior.cs" />
     <Compile Include="BindingProxy.cs" />

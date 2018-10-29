@@ -9,7 +9,7 @@ namespace Rml.Wpf.Converter
     /// <summary>
     /// 変換定義
     /// </summary>
-    public class Converter
+    public class ValueConverterInfo
     {
         /// <summary>
         /// 変換元
@@ -29,14 +29,14 @@ namespace Rml.Wpf.Converter
         /// <summary>
         /// 変換定義
         /// </summary>
-        public Collection<Converter> Converters { get; }
+        public Collection<ValueConverterInfo> Converters { get; }
 
         /// <summary>
         /// 
         /// </summary>
         public ValueConverter()
         {
-            Converters = new Collection<Converter>();
+            Converters = new Collection<ValueConverterInfo>();
         }
 
         /// <summary>
