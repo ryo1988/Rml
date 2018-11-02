@@ -2,9 +2,10 @@
 
 namespace Rml.Communication
 {
+    [Serializable]
     public class ReceiveEventArgs : EventArgs
     {
-        public byte[] Buffer;
+        public byte[] Buffer { get; set; }
 
         public ReceiveEventArgs(byte[] buffer)
         {
@@ -12,6 +13,7 @@ namespace Rml.Communication
         }
     }
 
+    [Serializable]
     public class LogEventArgs : EventArgs
     {
         public string Log;
