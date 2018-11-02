@@ -7,25 +7,41 @@ namespace Rml.RedirectLoadAssemblyFolder
 {
     public class RedirectLoadAssemblyFolder
     {
+        public static void Redirect(string folderPath, AppDomain appDomain)
+        {
+            AttachHandler(folderPath, appDomain);
+        }
+
         public static void Redirect(string folderPath)
         {
-            AttachHandler(folderPath);
+            AttachHandler(folderPath, AppDomain.CurrentDomain);
+        }
+
+        public static void RedirectExecutingAssemblyFolder(AppDomain appDomain)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            var folderPath = Path.GetDirectoryName(assembly.Location);
+            AttachHandler(folderPath, appDomain);
         }
 
         public static void RedirectExecutingAssemblyFolder()
         {
-            var assembly = Assembly.GetExecutingAssembly();
-            var folderPath = Path.GetDirectoryName(assembly.Location);
-            AttachHandler(folderPath);
+            RedirectExecutingAssemblyFolder(AppDomain.CurrentDomain);
         }
 
-        private static void AttachHandler(string folderPath)
+        private static void AttachHandler(string folderPath, AppDomain appDomain)
         {
             var files = Directory.GetFiles(folderPath, "*.dll", SearchOption.AllDirectories);
             var haveAssembly = new HashSet<string>(files);
 
-            AppDomain.CurrentDomain.AssemblyResolve += (s, e) =>
+            appDomain.AssemblyResolve += (s, e) =>
             {
+                var requestingAssemblyFolderPath = Path.GetDirectoryName(e.RequestingAssembly.Location);
+                if (folderPath != requestingAssemblyFolderPath)
+                {
+                    return null;
+                }
+
                 var assemblyName = new AssemblyName(e.Name);
                 var path = Path.Combine(folderPath, assemblyName.Name + ".dll");
                 if (haveAssembly.Contains(path) == false)
