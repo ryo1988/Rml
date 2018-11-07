@@ -124,6 +124,7 @@
     <Compile Include="MarkupExtension\EnumValuesExtension.cs" />
     <Compile Include="Behavior\MouseDragBehavior.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UIDispatcherSchedulerHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
