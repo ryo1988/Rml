@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Reactive.Bindings.Extensions;
 
@@ -54,7 +53,7 @@ namespace Rml
                     UnsubscribeAll();
                     Subscribe(source);
                 });
-                return Disposable.Create(() =>
+                return System.Reactive.Disposables.Disposable.Create(() =>
                 {
                     disposable.Dispose();
                     UnsubscribeAll();
