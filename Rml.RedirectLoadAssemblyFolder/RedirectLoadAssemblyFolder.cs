@@ -29,14 +29,8 @@ namespace Rml.RedirectLoadAssemblyFolder
             RedirectExecutingAssemblyFolder(AppDomain.CurrentDomain);
         }
 
-        private static Assembly LoadAssembly(HashSet<string> haveAssembly, string folderPath, AppDomain appDomain, string location, string name)
+        private static Assembly LoadAssembly(HashSet<string> haveAssembly, string folderPath, AppDomain appDomain, string name)
         {
-            var requestingAssemblyFolderPath = Path.GetDirectoryName(location);
-            if (folderPath != requestingAssemblyFolderPath && folderPath != appDomain.BaseDirectory)
-            {
-                return null;
-            }
-
             var assemblyName = new AssemblyName(name);
             var path = Path.Combine(folderPath, assemblyName.Name + ".dll");
             if (haveAssembly.Contains(path) == false)
@@ -71,7 +65,7 @@ namespace Rml.RedirectLoadAssemblyFolder
             var files = Directory.GetFiles(folderPath, "*.dll", SearchOption.AllDirectories);
             var haveAssembly = new HashSet<string>(files);
 
-            appDomain.AssemblyResolve += (s, e) => LoadAssembly(haveAssembly, folderPath, appDomain, e.RequestingAssembly?.Location ?? Assembly.GetCallingAssembly().Location, e.Name);
+            appDomain.AssemblyResolve += (s, e) => LoadAssembly(haveAssembly, folderPath, appDomain, e.Name);
         }
     }
 }

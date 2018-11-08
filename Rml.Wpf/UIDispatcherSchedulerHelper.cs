@@ -6,8 +6,15 @@ using Reactive.Bindings;
 
 namespace Rml.Wpf
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public static class UIDispatcherSchedulerHelper
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="action"></param>
         public static void ScheduleUIDispatcher(Action action)
         {
             try
