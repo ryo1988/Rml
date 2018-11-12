@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -15,7 +16,7 @@ namespace Rml.Wpf.Behavior
         /// 
         /// </summary>
         public static readonly DependencyProperty SelectedItemsProperty = DependencyProperty.Register(
-            "SelectedItems", typeof(Array), typeof(ListBoxSelectedItemsBehavior), new FrameworkPropertyMetadata(default(Array), FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, SelectedItemsPropertyChanged));
+            "SelectedItems", typeof(IList), typeof(ListBoxSelectedItemsBehavior), new FrameworkPropertyMetadata(default(Array), FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, SelectedItemsPropertyChanged));
 
         private static void SelectedItemsPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -56,7 +57,7 @@ namespace Rml.Wpf.Behavior
         /// <summary>
         /// 
         /// </summary>
-        public Array SelectedItems
+        public IList SelectedItems
         {
             get { return (Array)GetValue(SelectedItemsProperty); }
             set { SetValue(SelectedItemsProperty, value); }
