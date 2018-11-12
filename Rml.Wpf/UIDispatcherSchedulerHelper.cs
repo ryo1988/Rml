@@ -27,7 +27,7 @@ namespace Rml.Wpf
         public static void ScheduleUIDispatcher(Action action)
         {
             var isSchedulerCreated = (bool)GetFieldValue(typeof(UIDispatcherScheduler), null, "IsSchedulerCreated");
-            if (isSchedulerCreated)
+            if (isSchedulerCreated || SynchronizationContext.Current != null)
             {
                 UIDispatcherScheduler.Default.Schedule(action);
             }
