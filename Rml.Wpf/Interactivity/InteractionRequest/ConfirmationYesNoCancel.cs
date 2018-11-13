@@ -50,6 +50,7 @@ namespace Rml.Wpf.Interactivity.InteractionRequest
         /// <summary>
         /// 
         /// </summary>
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
         public ConfirmationYesNoCancelResult Result { get; set; }
     }
 }

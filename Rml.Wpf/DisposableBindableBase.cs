@@ -20,10 +20,10 @@ namespace Rml.Wpf
         /// <inheritdoc />
         public void Dispose()
         {
-            if (Interlocked.Exchange(ref this._isDisposed, 1) == 1)
+            if (Interlocked.Exchange(ref _isDisposed, 1) == 1)
                 return;
-            this.Dispose(true);
-            GC.SuppressFinalize((object) this);
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         /// <summary>

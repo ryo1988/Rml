@@ -40,10 +40,6 @@ namespace Rml
                 throw new ArgumentException(nameof(propertyExpression));
 
             var memberInfo = ((MemberExpression)propertyExpression.Body).Member;
-            if (memberInfo == null)
-            {
-                return null;
-            }
 
             var attributes = (DescriptionAttribute[])memberInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
 

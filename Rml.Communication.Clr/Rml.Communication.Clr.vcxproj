@@ -160,7 +160,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ICommunicationService.h" />
-    <ClInclude Include="src\Resource.h" />
     <ClInclude Include="src\stdafx.h" />
   </ItemGroup>
   <ItemGroup>

@@ -5,7 +5,6 @@
 #include <msclr/marshal_cppstd.h>
 #include <msclr/marshal.h>
 #include <msclr/marshal_windows.h>
-#include <msclr/marshal_cppstd.h>
 #include <msclr/marshal_atl.h>
 
 using namespace System;  
@@ -25,6 +24,12 @@ ICommunicationService::~ICommunicationService()
 ref class ReceiveEventReceiver
 {
 public:
+    ReceiveEventReceiver::ReceiveEventReceiver()
+    : _receiveCallback(nullptr)
+    {
+        
+    }
+
     void Hnadler(System::Object^ sender, ReceiveEventArgs^ args)
     {
         if (_receiveCallback == nullptr)
@@ -52,6 +57,11 @@ private:
 ref class LogedEventReceiver
 {
 public:
+    LogedEventReceiver::LogedEventReceiver()
+    : _logedCallback(nullptr)
+    {
+    }
+
     void Hnadler(System::Object^ sender, LogEventArgs^ args)
     {
         if (_logedCallback == nullptr)

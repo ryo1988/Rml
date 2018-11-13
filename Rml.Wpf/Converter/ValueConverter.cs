@@ -14,10 +14,12 @@ namespace Rml.Wpf.Converter
         /// <summary>
         /// 変換元
         /// </summary>
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
         public object From { get; set; }
         /// <summary>
         /// 変換先
         /// </summary>
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
         public object To { get; set; }
     }
 
@@ -29,6 +31,7 @@ namespace Rml.Wpf.Converter
         /// <summary>
         /// 変換定義
         /// </summary>
+        // ReSharper disable once CollectionNeverUpdated.Global
         public Collection<ValueConverterInfo> Converters { get; }
 
         /// <summary>

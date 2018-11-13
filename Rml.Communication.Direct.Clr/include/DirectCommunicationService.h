@@ -1,6 +1,5 @@
 #pragma once
 
-#include <functional>
 #include <ICommunicationService.h>
 
 #ifdef RMLCOMMUNICATIONDIRECTCLRDLL_EXPORTS

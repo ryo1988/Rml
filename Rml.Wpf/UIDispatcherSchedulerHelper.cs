@@ -10,7 +10,7 @@ namespace Rml.Wpf
     /// <summary>
     /// 
     /// </summary>
-    public static class UIDispatcherSchedulerHelper
+    public static class UiDispatcherSchedulerHelper
     {
         private static object GetFieldValue(Type type, object instance, string fieldName)
         {
@@ -24,7 +24,7 @@ namespace Rml.Wpf
         /// 
         /// </summary>
         /// <param name="action"></param>
-        public static void ScheduleUIDispatcher(Action action)
+        public static void ScheduleUiDispatcher(Action action)
         {
             var isSchedulerCreated = (bool)GetFieldValue(typeof(UIDispatcherScheduler), null, "IsSchedulerCreated");
             if (isSchedulerCreated || SynchronizationContext.Current != null)

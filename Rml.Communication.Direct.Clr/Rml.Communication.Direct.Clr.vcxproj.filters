@@ -21,9 +21,6 @@
     <ClInclude Include="include\DirectCommunicationService.h">
       <Filter>ヘッダー ファイル\include</Filter>
     </ClInclude>
-    <ClInclude Include="src\Resource.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="src\stdafx.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>

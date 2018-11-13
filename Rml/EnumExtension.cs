@@ -29,7 +29,12 @@ namespace Rml
             where T : struct
         {
             var converter = TypeDescriptor.GetConverter(typeof(T));
-            return (T)converter.ConvertFromString(value);
+            var convertFromString = converter.ConvertFromString(value);
+            if (convertFromString == null)
+            {
+                return default(T);
+            }
+            return (T)convertFromString;
         }
     }
 }

@@ -29,11 +29,13 @@ namespace Rml.Wpf.Converter
         /// <summary>
         /// 値
         /// </summary>
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
         public object Value { get; }
 
         /// <summary>
         /// ラベル
         /// </summary>
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
         public string Label { get; }
 
         /// <summary>
@@ -56,6 +58,7 @@ namespace Rml.Wpf.Converter
         /// <summary>
         /// 変換定義
         /// </summary>
+        // ReSharper disable once CollectionNeverUpdated.Global
         public Collection<EnumLabelConverterInfo> Converters { get; }
 
         /// <summary>
