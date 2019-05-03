@@ -2,11 +2,11 @@
 <package >
   <metadata>
     <id>Rml.Wpf</id>
-    <version>0.5.0.0</version>
+    <version>0.6.0.0</version>
     <title>Rml.Wpf</title>
     <authors>ryo1988</authors>
     <owners>ryo1988</owners>
-    <licenseUrl>https://github.com/ryo1988/Rml/blob/master/LICENSE</licenseUrl>
+    <license type="file">LICENSE</license>
     <projectUrl>https://github.com/ryo1988/Rml</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Rml.Wpf</description>
@@ -14,4 +14,7 @@
     <tags>WPF</tags>
     <copyright>Copyright (c) 2017 ryo1988</copyright>
   </metadata>
+  <files>
+    <file src="..\LICENSE" target="LICENSE" />
+  </files>
 </package>
