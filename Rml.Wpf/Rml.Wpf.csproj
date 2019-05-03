@@ -104,9 +104,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AttachedCommandBinding.cs" />
+    <Compile Include="AttachedBehavior\AttachedCommandBinding.cs" />
     <Compile Include="Behavior\ListBoxSelectedItemsBehavior.cs" />
     <Compile Include="Behavior\ListViewSelectedItemsBehavior.cs" />
+    <Compile Include="AttachedBehavior\ScrollSynchronize.cs" />
     <Compile Include="Behavior\WindowClosedBehavior.cs" />
     <Compile Include="Behavior\WindowClosingBehavior.cs" />
     <Compile Include="Converter\EnumLabelConverter.cs" />

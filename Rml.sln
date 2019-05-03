@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.16
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.202
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rml", "Rml\Rml.csproj", "{14C772AD-43E2-45BE-9B03-DFC8E29B0C50}"
 EndProject
@@ -32,6 +32,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rml.Communication.Tcp.Clr.NuGet", "Rml.Communication.Tcp.Clr.NuGet\Rml.Communication.Tcp.Clr.NuGet.csproj", "{16A5494A-17AD-4984-995C-DD1689B9B8D5}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Rml.Communication.Tcp.Clr.Test", "Rml.Communication.Tcp.Clr.Test\Rml.Communication.Tcp.Clr.Test.vcxproj", "{AB4A7393-5FD4-411E-89EC-E49085335D57}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rml.Wpf.Sandbox", "Rml.Wpf.Sandbox\Rml.Wpf.Sandbox.csproj", "{CEAB57EF-8E17-4A86-8EB0-E8D01A5D6AD8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -211,6 +213,18 @@ Global
 		{AB4A7393-5FD4-411E-89EC-E49085335D57}.Release|x64.Build.0 = Release|x64
 		{AB4A7393-5FD4-411E-89EC-E49085335D57}.Release|x86.ActiveCfg = Release|Win32
 		{AB4A7393-5FD4-411E-89EC-E49085335D57}.Release|x86.Build.0 = Release|Win32
+		{CEAB57EF-8E17-4A86-8EB0-E8D01A5D6AD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEAB57EF-8E17-4A86-8EB0-E8D01A5D6AD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEAB57EF-8E17-4A86-8EB0-E8D01A5D6AD8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CEAB57EF-8E17-4A86-8EB0-E8D01A5D6AD8}.Debug|x64.Build.0 = Debug|Any CPU
+		{CEAB57EF-8E17-4A86-8EB0-E8D01A5D6AD8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CEAB57EF-8E17-4A86-8EB0-E8D01A5D6AD8}.Debug|x86.Build.0 = Debug|Any CPU
+		{CEAB57EF-8E17-4A86-8EB0-E8D01A5D6AD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEAB57EF-8E17-4A86-8EB0-E8D01A5D6AD8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEAB57EF-8E17-4A86-8EB0-E8D01A5D6AD8}.Release|x64.ActiveCfg = Release|Any CPU
+		{CEAB57EF-8E17-4A86-8EB0-E8D01A5D6AD8}.Release|x64.Build.0 = Release|Any CPU
+		{CEAB57EF-8E17-4A86-8EB0-E8D01A5D6AD8}.Release|x86.ActiveCfg = Release|Any CPU
+		{CEAB57EF-8E17-4A86-8EB0-E8D01A5D6AD8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
