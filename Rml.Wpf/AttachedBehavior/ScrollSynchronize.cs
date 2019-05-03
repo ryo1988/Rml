@@ -2,8 +2,6 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using Xceed.Wpf.Toolkit.Core.Utilities;
 
 namespace Rml.Wpf.AttachedBehavior
 {
@@ -46,7 +44,7 @@ namespace Rml.Wpf.AttachedBehavior
             var oldGroup = e.OldValue as string;
             var newGroup = e.NewValue as string;
 
-            var scrollViewer = d as ScrollViewer ?? VisualTreeHelperEx.FindDescendantByType<ScrollViewer>((Visual)d);
+            var scrollViewer = d as ScrollViewer;
 
             if (scrollViewer is null)
             {
@@ -74,9 +72,9 @@ namespace Rml.Wpf.AttachedBehavior
                     }
                     scrollViewers.Add(changedScrollViewer);
                     Groups.Add(changedScrollViewer, newGroup);
-                }
 
-                SyncScroll(newGroup, changedScrollViewer);
+                    SyncScroll(newGroup, changedScrollViewer);
+                }
             }
         }
 

@@ -7,57 +7,87 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Rml.Wpf.Sandbox"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:system="clr-namespace:System;assembly=mscorlib"
     Title="MainWindow"
     Width="800"
     Height="450"
     mc:Ignorable="d">
     <Window.Resources>
-        <Style TargetType="ScrollViewer">
-            <Setter Property="attachedBehavior:ScrollSynchronize.ScrollGroup" Value="1" />
-        </Style>
+        <x:Array x:Key="Array" Type="system:Int32">
+            <system:Int32>1</system:Int32>
+            <system:Int32>2</system:Int32>
+        </x:Array>
     </Window.Resources>
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
-        </Grid.RowDefinitions>
-        <ListView Grid.Row="0">
-            <ListViewItem>1</ListViewItem>
-            <ListViewItem>2</ListViewItem>
-            <ListViewItem>3</ListViewItem>
-            <ListViewItem>4</ListViewItem>
-            <ListViewItem>5</ListViewItem>
-            <ListViewItem>6</ListViewItem>
-            <ListViewItem>7</ListViewItem>
-            <ListViewItem>8</ListViewItem>
-            <ListViewItem>9</ListViewItem>
-            <ListViewItem>10</ListViewItem>
-        </ListView>
-        <ListView Grid.Row="1">
-            <ListViewItem>1</ListViewItem>
-            <ListViewItem>2</ListViewItem>
-            <ListViewItem>3</ListViewItem>
-            <ListViewItem>4</ListViewItem>
-            <ListViewItem>5</ListViewItem>
-            <ListViewItem>6</ListViewItem>
-            <ListViewItem>7</ListViewItem>
-            <ListViewItem>8</ListViewItem>
-            <ListViewItem>9</ListViewItem>
-            <ListViewItem>10</ListViewItem>
-        </ListView>
-        <ListView Grid.Row="2">
-            <ListViewItem>1</ListViewItem>
-            <ListViewItem>2</ListViewItem>
-            <ListViewItem>3</ListViewItem>
-            <ListViewItem>4</ListViewItem>
-            <ListViewItem>5</ListViewItem>
-            <ListViewItem>6</ListViewItem>
-            <ListViewItem>7</ListViewItem>
-            <ListViewItem>8</ListViewItem>
-            <ListViewItem>9</ListViewItem>
-            <ListViewItem>10</ListViewItem>
-        </ListView>
-    </Grid>
+    <TabControl ItemsSource="{StaticResource Array}">
+        <TabControl.ContentTemplate>
+            <DataTemplate>
+                <DataTemplate.Resources>
+                    <Style x:Key="{x:Static GridView.GridViewScrollViewerStyleKey}" TargetType="ScrollViewer">
+                        <Setter Property="attachedBehavior:ScrollSynchronize.ScrollGroup" Value="1" />
+                    </Style>
+                </DataTemplate.Resources>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <ListView Grid.Row="0">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn />
+                            </GridView>
+                        </ListView.View>
+                        <ListViewItem>1</ListViewItem>
+                        <ListViewItem>2</ListViewItem>
+                        <ListViewItem>3</ListViewItem>
+                        <ListViewItem>4</ListViewItem>
+                        <ListViewItem>5</ListViewItem>
+                        <ListViewItem>6</ListViewItem>
+                        <ListViewItem>7</ListViewItem>
+                        <ListViewItem>8</ListViewItem>
+                        <ListViewItem>9</ListViewItem>
+                        <ListViewItem>10</ListViewItem>
+                    </ListView>
+                    <ListView Grid.Row="1">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn />
+                            </GridView>
+                        </ListView.View>
+                        <ListViewItem>1</ListViewItem>
+                        <ListViewItem>2</ListViewItem>
+                        <ListViewItem>3</ListViewItem>
+                        <ListViewItem>4</ListViewItem>
+                        <ListViewItem>5</ListViewItem>
+                        <ListViewItem>6</ListViewItem>
+                        <ListViewItem>7</ListViewItem>
+                        <ListViewItem>8</ListViewItem>
+                        <ListViewItem>9</ListViewItem>
+                        <ListViewItem>10</ListViewItem>
+                    </ListView>
+                    <ListView Grid.Row="2">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn />
+                            </GridView>
+                        </ListView.View>
+                        <ListViewItem>1</ListViewItem>
+                        <ListViewItem>2</ListViewItem>
+                        <ListViewItem>3</ListViewItem>
+                        <ListViewItem>4</ListViewItem>
+                        <ListViewItem>5</ListViewItem>
+                        <ListViewItem>6</ListViewItem>
+                        <ListViewItem>7</ListViewItem>
+                        <ListViewItem>8</ListViewItem>
+                        <ListViewItem>9</ListViewItem>
+                        <ListViewItem>10</ListViewItem>
+                    </ListView>
+                </Grid>
+            </DataTemplate>
+        </TabControl.ContentTemplate>
+    </TabControl>
+
 </Window>
