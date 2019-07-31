@@ -1,12 +1,12 @@
 ﻿<UserControl
-    x:Class="Rml.Wpf.Interactivity.PopupWindows.ConfirmationYesNoCancel"
+    x:Class="Rml.Wpf.Interactivity.PopupWindows.Confirmation"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mvvm="http://prismlibrary.com/"
     xmlns:popupWindows="clr-namespace:Rml.Wpf.Interactivity.PopupWindows"
-    d:DataContext="{d:DesignInstance popupWindows:ConfirmationYesNoCancelViewModel}"
+    d:DataContext="{d:DesignInstance popupWindows:ConfirmationViewModel}"
     mvvm:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
     <Grid Margin="5">
@@ -17,7 +17,7 @@
         <ContentControl
             Grid.Row="0"
             Focusable="False"
-            Content="{Binding ConfirmationYesNoCancel.Content}"/>
+            Content="{Binding Confirmation.Content}"/>
         <ListBox
             Grid.Row="1"
             x:Name="ButtonList"

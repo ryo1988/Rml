@@ -10,7 +10,7 @@ namespace Rml.Wpf.Interactivity.PopupWindows
     /// <summary>
     /// 
     /// </summary>
-    public class ConfirmationYesNoCanceItemlViewModel : DisposableBindableBase
+    public class ConfirmationItemViewModel : DisposableBindableBase
     {
         /// <summary>
         /// 
@@ -30,7 +30,7 @@ namespace Rml.Wpf.Interactivity.PopupWindows
         /// <summary>
         /// 
         /// </summary>
-        public ConfirmationYesNoCanceItemlViewModel(object label, int index)
+        public ConfirmationItemViewModel(object label, int index)
         {
             Label = label;
             ExecuteCommand = new ReactiveCommand().AddTo(Cd);
@@ -41,7 +41,7 @@ namespace Rml.Wpf.Interactivity.PopupWindows
     /// <summary>
     /// 
     /// </summary>
-    public class ConfirmationYesNoCancelViewModel : DisposableBindableBase, IInteractionRequestAware
+    public class ConfirmationViewModel : DisposableBindableBase, IInteractionRequestAware
     {
         #region Notification
 
@@ -55,7 +55,7 @@ namespace Rml.Wpf.Interactivity.PopupWindows
             {
                 if (SetProperty(ref _notification, value))
                 {
-                    RaisePropertyChanged(nameof(ConfirmationYesNoCancel));
+                    RaisePropertyChanged(nameof(Confirmation));
                 }
             }
         }
@@ -68,20 +68,20 @@ namespace Rml.Wpf.Interactivity.PopupWindows
         /// <summary>
         /// 
         /// </summary>
-        public InteractionRequest.ConfirmationYesNoCancel ConfirmationYesNoCancel => Notification as InteractionRequest.ConfirmationYesNoCancel;
+        public InteractionRequest.Confirmation Confirmation => Notification as InteractionRequest.Confirmation;
 
         /// <summary>
         /// 
         /// </summary>
-        public ReadOnlyReactiveProperty<ConfirmationYesNoCanceItemlViewModel[]> Items { get; }
+        public ReadOnlyReactiveProperty<ConfirmationItemViewModel[]> Items { get; }
 
         /// <summary>
         /// 
         /// </summary>
-        public ConfirmationYesNoCancelViewModel()
+        public ConfirmationViewModel()
         {
-            Items = this.ObserveProperty(o => o.ConfirmationYesNoCancel) 
-                .Select(o => o?.LabelList.Select((oo, i) => new ConfirmationYesNoCanceItemlViewModel(oo, i)).ToArray())
+            Items = this.ObserveProperty(o => o.Confirmation) 
+                .Select(o => o?.LabelList.Select((oo, i) => new ConfirmationItemViewModel(oo, i)).ToArray())
                 .DisposeBefore()
                 .ToReadOnlyReactiveProperty()
                 .AddTo(Cd);
@@ -96,7 +96,7 @@ namespace Rml.Wpf.Interactivity.PopupWindows
         private IDisposable BindCommand(ReactiveCommand command, int index)
         {
             return command
-                .Do(_ => ConfirmationYesNoCancel.ResultIndex = index)
+                .Do(_ => Confirmation.ResultIndex = index)
                 .Subscribe(_ => FinishInteraction());
         }
     }

@@ -3,29 +3,10 @@ using Prism.Interactivity.InteractionRequest;
 
 namespace Rml.Wpf.Interactivity.InteractionRequest
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    public enum ConfirmationYesNoCancelResult
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        Cancel,
-        /// <summary>
-        /// 
-        /// </summary>
-        Yes,
-        /// <summary>
-        /// 
-        /// </summary>
-        No,
-    }
-
     /// <inheritdoc />
     /// <summary>
     /// </summary>
-    public class ConfirmationYesNoCancel : INotification
+    public class Confirmation : INotification
     {
         /// <inheritdoc />
         public string Title { get; set; }
