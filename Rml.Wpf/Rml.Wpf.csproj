@@ -133,7 +133,12 @@
     <None Include="PackNuget.bat" />
     <None Include="Rml.Wpf.nuspec" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Rml\Rml.csproj">
+      <Project>{b669d20c-ee7a-432e-aea9-143e13f974de}</Project>
+      <Name>Rml</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <Page Include="Interactivity\PopupWindows\ConfirmationYesNoCancel.xaml">
       <SubType>Designer</SubType>

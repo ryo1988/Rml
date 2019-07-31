@@ -1,4 +1,5 @@
-﻿using Prism.Interactivity.InteractionRequest;
+﻿using System.Collections.Generic;
+using Prism.Interactivity.InteractionRequest;
 
 namespace Rml.Wpf.Interactivity.InteractionRequest
 {
@@ -35,22 +36,11 @@ namespace Rml.Wpf.Interactivity.InteractionRequest
         /// <summary>
         /// 
         /// </summary>
-        public object YesLabel { get; set; } = "Yes";
+        public List<object> LabelList { get; set; } = new List<object>();
 
         /// <summary>
         /// 
         /// </summary>
-        public object NoLabel { get; set; } = "No";
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public object CancelLabel { get; set; } = "Cancel";
-
-        /// <summary>
-        /// 
-        /// </summary>
-        // ReSharper disable once UnusedAutoPropertyAccessor.Global
-        public ConfirmationYesNoCancelResult Result { get; set; }
+        public int ResultIndex { get; set; } = -1;
     }
 }
