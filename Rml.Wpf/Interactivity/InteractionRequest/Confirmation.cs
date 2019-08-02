@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Prism.Interactivity.InteractionRequest;
+﻿using Prism.Interactivity.InteractionRequest;
 
 namespace Rml.Wpf.Interactivity.InteractionRequest
 {
@@ -17,7 +16,7 @@ namespace Rml.Wpf.Interactivity.InteractionRequest
         /// <summary>
         /// 
         /// </summary>
-        public List<object> LabelList { get; set; } = new List<object>();
+        public object[] Choices { get; set; }
 
         /// <summary>
         /// 

@@ -10,7 +10,7 @@ namespace Rml.Wpf.Interactivity.PopupWindows
     /// <summary>
     /// 
     /// </summary>
-    public class ConfirmationItemViewModel : DisposableBindableBase
+    public class ConfirmationChoiceViewModel : DisposableBindableBase
     {
         /// <summary>
         /// 
@@ -30,7 +30,7 @@ namespace Rml.Wpf.Interactivity.PopupWindows
         /// <summary>
         /// 
         /// </summary>
-        public ConfirmationItemViewModel(object label, int index)
+        public ConfirmationChoiceViewModel(object label, int index)
         {
             Label = label;
             ExecuteCommand = new ReactiveCommand().AddTo(Cd);
@@ -73,20 +73,20 @@ namespace Rml.Wpf.Interactivity.PopupWindows
         /// <summary>
         /// 
         /// </summary>
-        public ReadOnlyReactiveProperty<ConfirmationItemViewModel[]> Items { get; }
+        public ReadOnlyReactiveProperty<ConfirmationChoiceViewModel[]> Choices { get; }
 
         /// <summary>
         /// 
         /// </summary>
         public ConfirmationViewModel()
         {
-            Items = this.ObserveProperty(o => o.Confirmation) 
-                .Select(o => o?.LabelList.Select((oo, i) => new ConfirmationItemViewModel(oo, i)).ToArray())
+            Choices = this.ObserveProperty(o => o.Confirmation) 
+                .Select(o => o?.Choices?.Select((oo, i) => new ConfirmationChoiceViewModel(oo, i)).ToArray())
                 .DisposeBefore()
                 .ToReadOnlyReactiveProperty()
                 .AddTo(Cd);
 
-            Items
+            Choices
                 .Select(o => o?.Select(oo => BindCommand(oo.ExecuteCommand, oo.Index)).ToArray())
                 .DisposeBefore()
                 .Subscribe()

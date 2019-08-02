@@ -16,30 +16,29 @@
         </Grid.RowDefinitions>
         <ContentControl
             Grid.Row="0"
-            Focusable="False"
-            Content="{Binding Confirmation.Content}"/>
-        <ListBox
-            Grid.Row="1"
+            Content="{Binding Confirmation.Content}"
+            Focusable="False" />
+        <ItemsControl
             x:Name="ButtonList"
-            Focusable="False"
+            Grid.Row="1"
             HorizontalAlignment="Center"
-            ItemsSource="{Binding Items.Value}">
-            <ListBox.ItemContainerStyle>
-                <Style TargetType="{x:Type ListBoxItem}">
-                    <Setter Property="Focusable" Value="False" />
-                </Style>
-            </ListBox.ItemContainerStyle>
-            <ListBox.ItemTemplate>
+            BorderThickness="0"
+            Focusable="False"
+            ItemsSource="{Binding Choices.Value}">
+            <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Button x:Name="Button" Content="{Binding Label}" Command="{Binding ExecuteCommand}"/>
+                    <Button
+                        Margin="4"
+                        Padding="4"
+                        Command="{Binding ExecuteCommand}"
+                        Content="{Binding Label}" />
                 </DataTemplate>
-            </ListBox.ItemTemplate>
-            <ListBox.ItemsPanel>
+            </ItemsControl.ItemTemplate>
+            <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <StackPanel Orientation="Horizontal">
-                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" />
                 </ItemsPanelTemplate>
-            </ListBox.ItemsPanel>
-        </ListBox>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
     </Grid>
 </UserControl>

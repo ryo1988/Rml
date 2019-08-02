@@ -1,9 +1,9 @@
 ﻿using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Reflection;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
+using Xceed.Wpf.Toolkit.Core.Utilities;
 
 namespace Rml.Wpf.Interactivity.PopupWindows
 {
@@ -29,48 +29,13 @@ namespace Rml.Wpf.Interactivity.PopupWindows
                 case NotifyCollectionChangedAction.Reset:
                     // FocusVisualStyleを常に表示する
                     var property = typeof(KeyboardNavigation).GetProperty("AlwaysShowFocusVisual", BindingFlags.NonPublic | BindingFlags.Static);
+                    Debug.Assert(property != null, nameof(property) + " != null");
                     property.SetValue(null, true, null);
 
-                    // ListBoxの先頭を選択
-                    ButtonList.SelectedItem = ButtonList.Items[0];
-                    ButtonList.UpdateLayout();
-
-                    // DataTemplate内のButton要素を取り出す
-                    var listBoxItem = (ListBoxItem)ButtonList
-                        .ItemContainerGenerator
-                        .ContainerFromItem(ButtonList.SelectedItem);
-                    var contentPresenter = FindVisualChild<ContentPresenter>(listBoxItem);
-                    var button = (Button)contentPresenter.ContentTemplate.FindName("Button", contentPresenter);
-
-                    // フォーカスする
-                    button.Focus();
-
-                    // ListBoxの選択を解除
-                    ButtonList.SelectedItem = null;
-                    ButtonList.UpdateLayout();
+                    var button = VisualTreeHelperEx.FindDescendantByType<Button>(ButtonList);
+                    button?.Focus();
                     break;
             }
-        }
-
-        private childItem FindVisualChild<childItem>(DependencyObject obj) where childItem : DependencyObject
-        {
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
-            {
-                DependencyObject child = VisualTreeHelper.GetChild(obj, i);
-                if (child != null && child is childItem)
-                {
-                    return (childItem)child;
-                }
-                else
-                {
-                    childItem childOfChild = FindVisualChild<childItem>(child);
-                    if (childOfChild != null)
-                    {
-                        return childOfChild;
-                    }
-                }
-            }
-            return null;
         }
     }
 }
