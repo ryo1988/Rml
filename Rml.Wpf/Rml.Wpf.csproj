@@ -115,13 +115,13 @@
     <Compile Include="Interactivity\InteractionRequest\AsyncInteractionRequest.cs" />
     <Compile Include="Behavior\DataGridSelectedItemBehavior.cs" />
     <Compile Include="BindingProxy.cs" />
-    <Compile Include="Interactivity\InteractionRequest\ConfirmationYesNoCancel.cs" />
+    <Compile Include="Interactivity\InteractionRequest\Confirmation.cs" />
     <Compile Include="Converter\EnumToBoolConverter.cs" />
     <Compile Include="Converter\ValueConverter.cs" />
-    <Compile Include="Interactivity\PopupWindows\ConfirmationYesNoCancel.xaml.cs">
-      <DependentUpon>ConfirmationYesNoCancel.xaml</DependentUpon>
+    <Compile Include="Interactivity\PopupWindows\Confirmation.xaml.cs">
+      <DependentUpon>Confirmation.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Interactivity\PopupWindows\ConfirmationYesNoCancelViewModel.cs" />
+    <Compile Include="Interactivity\PopupWindows\ConfirmationViewModel.cs" />
     <Compile Include="MarkupExtension\EnumValuesExtension.cs" />
     <Compile Include="Behavior\MouseDragBehavior.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -133,9 +133,14 @@
     <None Include="PackNuget.bat" />
     <None Include="Rml.Wpf.nuspec" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
-    <Page Include="Interactivity\PopupWindows\ConfirmationYesNoCancel.xaml">
+    <ProjectReference Include="..\Rml\Rml.csproj">
+      <Project>{b669d20c-ee7a-432e-aea9-143e13f974de}</Project>
+      <Name>Rml</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Interactivity\PopupWindows\Confirmation.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
