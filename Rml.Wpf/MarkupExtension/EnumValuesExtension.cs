@@ -16,7 +16,7 @@ namespace Rml.Wpf.MarkupExtension
         public EnumValuesExtension(Type enumType)
         {
             if (null == enumType)
-                throw new Exception("EnumType is null");
+                throw new ArgumentException($"{nameof(enumType)} is null");
 
             _enumType = enumType;
         }

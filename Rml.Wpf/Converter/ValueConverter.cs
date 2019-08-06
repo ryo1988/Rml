@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Data;
@@ -14,12 +15,12 @@ namespace Rml.Wpf.Converter
         /// <summary>
         /// 変換元
         /// </summary>
-        // ReSharper disable once UnusedAutoPropertyAccessor.Global
+        [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global", Justification = "xamlから使う")]
         public object From { get; set; }
         /// <summary>
         /// 変換先
         /// </summary>
-        // ReSharper disable once UnusedAutoPropertyAccessor.Global
+        [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global", Justification = "xamlから使う")]
         public object To { get; set; }
     }
 
@@ -31,7 +32,8 @@ namespace Rml.Wpf.Converter
         /// <summary>
         /// 変換定義
         /// </summary>
-        // ReSharper disable once CollectionNeverUpdated.Global
+        [SuppressMessage("ReSharper", "MemberCanBePrivate.Global", Justification = "xamlから使う")]
+        [SuppressMessage("ReSharper", "CollectionNeverUpdated.Global", Justification = "xamlから使う")]
         public Collection<ValueConverterInfo> Converters { get; }
 
         /// <summary>

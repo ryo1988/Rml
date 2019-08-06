@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Data;
@@ -29,13 +30,13 @@ namespace Rml.Wpf.Converter
         /// <summary>
         /// 値
         /// </summary>
-        // ReSharper disable once UnusedAutoPropertyAccessor.Global
+        [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global", Justification = "xamlから使う")]
         public object Value { get; }
 
         /// <summary>
         /// ラベル
         /// </summary>
-        // ReSharper disable once UnusedAutoPropertyAccessor.Global
+        [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global", Justification = "xamlから使う")]
         public string Label { get; }
 
         /// <summary>
@@ -58,7 +59,8 @@ namespace Rml.Wpf.Converter
         /// <summary>
         /// 変換定義
         /// </summary>
-        // ReSharper disable once CollectionNeverUpdated.Global
+        [SuppressMessage("ReSharper", "MemberCanBePrivate.Global", Justification = "xamlから使う")]
+        [SuppressMessage("ReSharper", "CollectionNeverUpdated.Global", Justification = "xamlから使う")]
         public Collection<EnumLabelConverterInfo> Converters { get; }
 
         /// <summary>
