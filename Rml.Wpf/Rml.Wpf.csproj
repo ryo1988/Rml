@@ -110,6 +110,7 @@
     <Compile Include="AttachedBehavior\ScrollSynchronize.cs" />
     <Compile Include="Behavior\WindowClosedBehavior.cs" />
     <Compile Include="Behavior\WindowClosingBehavior.cs" />
+    <Compile Include="Behavior\WindowEscCloseBehavior.cs" />
     <Compile Include="Converter\EnumLabelConverter.cs" />
     <Compile Include="DisposableBindableBase.cs" />
     <Compile Include="Interactivity\InteractionRequest\AsyncInteractionRequest.cs" />
