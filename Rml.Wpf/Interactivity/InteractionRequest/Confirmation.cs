@@ -21,6 +21,11 @@ namespace Rml.Wpf.Interactivity.InteractionRequest
         /// <summary>
         /// 
         /// </summary>
+        public int DefaultIndex { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public int ResultIndex { get; set; } = -1;
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Reflection;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Xceed.Wpf.Toolkit.Core.Utilities;
@@ -12,6 +13,21 @@ namespace Rml.Wpf.Interactivity.PopupWindows
     /// </summary>
     public partial class Confirmation
     {
+        /// <summary>
+        /// 初期フォーカス位置
+        /// </summary>
+        public static readonly DependencyProperty DefaultIndexProperty = DependencyProperty.Register(
+            "DefaultIndex", typeof(int), typeof(Confirmation), new PropertyMetadata(default(int)));
+
+        /// <summary>
+        /// 初期フォーカス位置
+        /// </summary>
+        public int DefaultIndex
+        {
+            get { return (int) GetValue(DefaultIndexProperty); }
+            set { SetValue(DefaultIndexProperty, value); }
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -32,7 +48,8 @@ namespace Rml.Wpf.Interactivity.PopupWindows
                     Debug.Assert(property != null, nameof(property) + " != null");
                     property.SetValue(null, true, null);
 
-                    var button = VisualTreeHelperEx.FindDescendantByType<Button>(ButtonList);
+                    var item = (FrameworkElement)ButtonList.ItemContainerGenerator.ContainerFromIndex(DefaultIndex);
+                    var button = VisualTreeHelperEx.FindDescendantByType<Button>(item);
                     button?.Focus();
                     break;
             }

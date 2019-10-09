@@ -78,6 +78,11 @@ namespace Rml.Wpf.Interactivity.PopupWindows
         /// <summary>
         /// 
         /// </summary>
+        public ReadOnlyReactiveProperty<int> DefaultIndex { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public ConfirmationViewModel()
         {
             Choices = this.ObserveProperty(o => o.Confirmation) 
@@ -90,6 +95,11 @@ namespace Rml.Wpf.Interactivity.PopupWindows
                 .Select(o => o?.Select(oo => BindCommand(oo.ExecuteCommand, oo.Index)).ToArray())
                 .DisposeBefore()
                 .Subscribe()
+                .AddTo(Cd);
+
+            DefaultIndex = this.ObserveProperty(o => o.Confirmation)
+                .Select(o => o?.DefaultIndex ?? 0)
+                .ToReadOnlyReactiveProperty()
                 .AddTo(Cd);
         }
 
