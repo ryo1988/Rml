@@ -2,7 +2,7 @@
 using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Interactivity;
+using Microsoft.Xaml.Behaviors;
 
 namespace Rml.Wpf.Behavior
 {
