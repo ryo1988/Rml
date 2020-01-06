@@ -19,6 +19,11 @@ namespace Rml.Wpf.DialogService
         {
             InitializeComponent();
 
+            // FocusVisualStyleを常に表示する
+            var property = typeof(KeyboardNavigation).GetProperty("AlwaysShowFocusVisual", BindingFlags.NonPublic | BindingFlags.Static);
+            Debug.Assert(property != null, nameof(property) + " != null");
+            property.SetValue(null, true, null);
+
             ButtonList.ItemContainerGenerator.StatusChanged += ItemContainerGeneratorOnStatusChanged;
         }
 
@@ -47,11 +52,6 @@ namespace Rml.Wpf.DialogService
 
         private void FocusDefault()
         {
-            // FocusVisualStyleを常に表示する
-            var property = typeof(KeyboardNavigation).GetProperty("AlwaysShowFocusVisual", BindingFlags.NonPublic | BindingFlags.Static);
-            Debug.Assert(property != null, nameof(property) + " != null");
-            property.SetValue(null, true, null);
-
             var item = (FrameworkElement)ButtonList.ItemContainerGenerator.ContainerFromIndex(DefaultIndex);
             var button = VisualTreeHelperEx.FindDescendantByType<Button>(item);
             button?.Focus();
