@@ -63,11 +63,11 @@ namespace Rml.Wpf.DialogService
                 .Select((o, i) => new ConfirmationChoiceViewModel(o, i))
                 .Do(o => o.AddTo(_cd))
                 .ToArray();
+            DefaultIndex = parameters.GetValue<int>(ConfirmationDialogParameters.DefaultIndexKey);
+            RaisePropertyChanged(nameof(DefaultIndex));
             Choices
                 .ForEach(o => BindCommand(o.ExecuteCommand, o.Index, parameters).AddTo(_cd));
             RaisePropertyChanged(nameof(Choices));
-            DefaultIndex = parameters.GetValue<int>(ConfirmationDialogParameters.DefaultIndexKey);
-            RaisePropertyChanged(nameof(DefaultIndex));
         }
 
         private IDisposable BindCommand(ReactiveCommand command, int index, IDialogParameters parameters)
