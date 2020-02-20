@@ -1,8 +1,9 @@
-﻿using System.Collections.Specialized;
+﻿using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using Xceed.Wpf.Toolkit.Core.Utilities;
 
@@ -18,7 +19,15 @@ namespace Rml.Wpf.DialogService
         {
             InitializeComponent();
 
-            ((INotifyCollectionChanged)ButtonList.Items).CollectionChanged += ListBoxCollectionChanged;
+            ButtonList.ItemContainerGenerator.StatusChanged += ItemContainerGeneratorOnStatusChanged;
+        }
+
+        private void ItemContainerGeneratorOnStatusChanged(object sender, EventArgs e)
+        {
+            if (ButtonList.ItemContainerGenerator.Status != GeneratorStatus.ContainersGenerated)
+                return;
+
+            FocusDefault();
         }
 
         /// <summary>
@@ -36,21 +45,16 @@ namespace Rml.Wpf.DialogService
             set { SetValue(DefaultIndexProperty, value); }
         }
 
-        private void ListBoxCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void FocusDefault()
         {
-            switch (e.Action)
-            {
-                case NotifyCollectionChangedAction.Reset:
-                    // FocusVisualStyleを常に表示する
-                    var property = typeof(KeyboardNavigation).GetProperty("AlwaysShowFocusVisual", BindingFlags.NonPublic | BindingFlags.Static);
-                    Debug.Assert(property != null, nameof(property) + " != null");
-                    property.SetValue(null, true, null);
+            // FocusVisualStyleを常に表示する
+            var property = typeof(KeyboardNavigation).GetProperty("AlwaysShowFocusVisual", BindingFlags.NonPublic | BindingFlags.Static);
+            Debug.Assert(property != null, nameof(property) + " != null");
+            property.SetValue(null, true, null);
 
-                    var item = (FrameworkElement)ButtonList.ItemContainerGenerator.ContainerFromIndex(DefaultIndex);
-                    var button = VisualTreeHelperEx.FindDescendantByType<Button>(item);
-                    button?.Focus();
-                    break;
-            }
+            var item = (FrameworkElement)ButtonList.ItemContainerGenerator.ContainerFromIndex(DefaultIndex);
+            var button = VisualTreeHelperEx.FindDescendantByType<Button>(item);
+            button?.Focus();
         }
     }
 }

@@ -36,7 +36,8 @@
             HorizontalAlignment="Center"
             BorderThickness="0"
             Focusable="False"
-            ItemsSource="{Binding Choices}">
+            ItemsSource="{Binding Choices}"
+            VirtualizingStackPanel.IsVirtualizing="False">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Button
