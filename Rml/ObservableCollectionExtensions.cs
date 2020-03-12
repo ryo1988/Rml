@@ -88,6 +88,29 @@ namespace Rml
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="source"></param>
+        /// <param name="getObservableFunc"></param>
+        /// <typeparam name="TElement"></typeparam>
+        /// <typeparam name="TProperty"></typeparam>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static IObservable<(TElement element, TProperty property)> ObserveElementObservable<TElement, TProperty>(this ReadOnlyObservableCollection<TElement> source, Func<TElement, IObservable<TProperty>> getObservableFunc) where TElement : class
+        {
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
+            if (getObservableFunc == null)
+                throw new ArgumentNullException(nameof(getObservableFunc));
+
+            return ObserveElementCore<ReadOnlyObservableCollection<TElement>, TElement, (TElement element, TProperty property)>(source, (e, o) =>
+            {
+                var observable = getObservableFunc(e);
+                return observable.Subscribe(oo => o.OnNext((e, oo)));
+            });
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <typeparam name="TElement"></typeparam>
         /// <typeparam name="TProperty"></typeparam>
         /// <param name="source"></param>
