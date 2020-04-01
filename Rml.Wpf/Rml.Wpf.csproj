@@ -123,6 +123,7 @@
     </Compile>
     <Compile Include="DialogService\NotificationControlViewModel.cs" />
     <Compile Include="DialogService\NotificationDialogParameters.cs" />
+    <Compile Include="DisableAutomationPeer.cs" />
     <Compile Include="DisposableBindableBase.cs" />
     <Compile Include="Behavior\DataGridSelectedItemBehavior.cs" />
     <Compile Include="BindingProxy.cs" />
