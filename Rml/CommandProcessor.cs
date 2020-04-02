@@ -70,6 +70,24 @@ namespace Rml
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="execute"></param>
+        /// <param name="context"></param>
+        /// <typeparam name="TCommand"></typeparam>
+        /// <typeparam name="TContext"></typeparam>
+        /// <exception cref="ArgumentException"></exception>
+        public void Register<TCommand, TContext>(Func<TCommand, TContext, (Action undo, Action redo)> execute, TContext context)
+            where TCommand : struct, ICommand
+        {
+            var command = new TCommand();
+            if (command.Type != typeof(TCommand))
+                throw new ArgumentException($"{nameof(TCommand)}.{nameof(ICommand.Type)} != typeof({nameof(TCommand)})");
+
+            _executes.Add(typeof(TCommand), o => execute((TCommand)o, context));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="command"></param>
         public void Execute(ICommand command)
         {
@@ -82,6 +100,28 @@ namespace Rml
             _undos.Push(undoRedo);
             _redos.Clear();
             undoRedo.redo();
+            UpdateUndoRedoCount();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="undo"></param>
+        /// <param name="redo"></param>
+        public void Execute(ICommand command, Action<Action> undo, Action<Action> redo)
+        {
+            _commandSubject.OnNext(command);
+
+            var undoRedo = _executes[command.Type](command);
+            if (undoRedo == default)
+                return;
+
+            (Action undo, Action redo) wrapUndoRedo = (() => undo(undoRedo.undo), () => redo(undoRedo.redo));
+
+            _undos.Push(wrapUndoRedo);
+            _redos.Clear();
+            wrapUndoRedo.redo();
             UpdateUndoRedoCount();
         }
 
