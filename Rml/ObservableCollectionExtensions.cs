@@ -19,7 +19,7 @@ namespace Rml
             {
                 var subscriptionCache = new Dictionary<object, IDisposable>();
 
-                void Subscribe(IEnumerable<TElement> elements)
+                static void Subscribe(IEnumerable<TElement> elements, IObserver<TResult> observer, Func<TElement, IObserver<TResult>, IDisposable> subscribeAction, Dictionary<object, IDisposable> subscriptionCache)
                 {
                     foreach (var element in elements)
                     {
@@ -28,14 +28,14 @@ namespace Rml
                     }
                 }
 
-                void UnsubscribeAll()
+                static void UnsubscribeAll(Dictionary<object, IDisposable> subscriptionCache)
                 {
                     foreach (var disposable1 in subscriptionCache.Values)
                         disposable1.Dispose();
                     subscriptionCache.Clear();
                 }
 
-                Subscribe(source);
+                Subscribe(source, observer, subscribeAction, subscriptionCache);
                 var disposable = source.CollectionChangedAsObservable().Subscribe(x =>
                 {
                     if (x.Action == NotifyCollectionChangedAction.Remove || x.Action == NotifyCollectionChangedAction.Replace)
@@ -47,16 +47,16 @@ namespace Rml
                         }
                     }
                     if (x.Action == NotifyCollectionChangedAction.Add || x.Action == NotifyCollectionChangedAction.Replace)
-                        Subscribe(x.NewItems.Cast<TElement>());
+                        Subscribe(x.NewItems.Cast<TElement>(), observer, subscribeAction, subscriptionCache);
                     if (x.Action != NotifyCollectionChangedAction.Reset)
                         return;
-                    UnsubscribeAll();
-                    Subscribe(source);
+                    UnsubscribeAll(subscriptionCache);
+                    Subscribe(source, observer, subscribeAction, subscriptionCache);
                 });
                 return System.Reactive.Disposables.Disposable.Create(() =>
                 {
                     disposable.Dispose();
-                    UnsubscribeAll();
+                    UnsubscribeAll(subscriptionCache);
                 });
             }));
         }

@@ -85,5 +85,14 @@ namespace Rml
                     }
                 });
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="o"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static IObservable<T> WhereNotNull<T>(this IObservable<T?> o) where T:class
+            => o.Where(x => x != null)!;
     }
 }
