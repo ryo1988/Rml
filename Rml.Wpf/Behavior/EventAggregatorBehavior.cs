@@ -25,7 +25,8 @@ namespace Rml.Wpf.Behavior
 
         private void EventAggregatorChanged()
         {
-            Subscribe();
+            _subscribeDisposable?.Dispose();
+            _subscribeDisposable = Subscribe();
         }
 
         /// <summary>

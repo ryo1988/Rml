@@ -42,5 +42,14 @@ namespace Rml
                 .Take(1)
                 .SelectMany(o => o);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="o"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> o) where T:class
+            => o.Where(x => x != null)!;
     }
 }

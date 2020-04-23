@@ -19,7 +19,7 @@ namespace Rml
             {
                 var subscriptionCache = new Dictionary<object, IDisposable>();
 
-                void Subscribe(IEnumerable<TElement> elements)
+                static void Subscribe(IEnumerable<TElement> elements, IObserver<TResult> observer, Func<TElement, IObserver<TResult>, IDisposable> subscribeAction, Dictionary<object, IDisposable> subscriptionCache)
                 {
                     foreach (var element in elements)
                     {
@@ -28,14 +28,14 @@ namespace Rml
                     }
                 }
 
-                void UnsubscribeAll()
+                static void UnsubscribeAll(Dictionary<object, IDisposable> subscriptionCache)
                 {
                     foreach (var disposable1 in subscriptionCache.Values)
                         disposable1.Dispose();
                     subscriptionCache.Clear();
                 }
 
-                Subscribe(source);
+                Subscribe(source, observer, subscribeAction, subscriptionCache);
                 var disposable = source.CollectionChangedAsObservable().Subscribe(x =>
                 {
                     if (x.Action == NotifyCollectionChangedAction.Remove || x.Action == NotifyCollectionChangedAction.Replace)
@@ -47,16 +47,16 @@ namespace Rml
                         }
                     }
                     if (x.Action == NotifyCollectionChangedAction.Add || x.Action == NotifyCollectionChangedAction.Replace)
-                        Subscribe(x.NewItems.Cast<TElement>());
+                        Subscribe(x.NewItems.Cast<TElement>(), observer, subscribeAction, subscriptionCache);
                     if (x.Action != NotifyCollectionChangedAction.Reset)
                         return;
-                    UnsubscribeAll();
-                    Subscribe(source);
+                    UnsubscribeAll(subscriptionCache);
+                    Subscribe(source, observer, subscribeAction, subscriptionCache);
                 });
                 return System.Reactive.Disposables.Disposable.Create(() =>
                 {
                     disposable.Dispose();
-                    UnsubscribeAll();
+                    UnsubscribeAll(subscriptionCache);
                 });
             }));
         }
@@ -79,6 +79,29 @@ namespace Rml
                 throw new ArgumentNullException(nameof(getObservableFunc));
 
             return ObserveElementCore<TCollection, TElement, (TElement element, TProperty property)>(source, (e, o) =>
+            {
+                var observable = getObservableFunc(e);
+                return observable.Subscribe(oo => o.OnNext((e, oo)));
+            });
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="getObservableFunc"></param>
+        /// <typeparam name="TElement"></typeparam>
+        /// <typeparam name="TProperty"></typeparam>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static IObservable<(TElement element, TProperty property)> ObserveElementObservable<TElement, TProperty>(this ReadOnlyObservableCollection<TElement> source, Func<TElement, IObservable<TProperty>> getObservableFunc) where TElement : class
+        {
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
+            if (getObservableFunc == null)
+                throw new ArgumentNullException(nameof(getObservableFunc));
+
+            return ObserveElementCore<ReadOnlyObservableCollection<TElement>, TElement, (TElement element, TProperty property)>(source, (e, o) =>
             {
                 var observable = getObservableFunc(e);
                 return observable.Subscribe(oo => o.OnNext((e, oo)));

@@ -11,9 +11,10 @@
     d:DesignWidth="800"
     mvvm:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
-    <StackPanel Orientation="Vertical">
+    <StackPanel FocusManager.FocusedElement="{Binding ElementName=OkButton}" Orientation="Vertical">
         <ContentPresenter Margin="25" Content="{Binding Content}" />
         <Button
+            x:Name="OkButton"
             Margin="25,0,25,25"
             Command="{Binding OkCommand}"
             Content="OK" />
