@@ -13,27 +13,11 @@ namespace Rml
     /// </summary>
     public static class ObservableCollectionExtensions
     {
-        private static IObservable<TResult> ObserveElementCore<TCollection, TElement, TResult>(TCollection source, Func<TElement, IObserver<TResult>, IDisposable> subscribeAction) where TCollection : INotifyCollectionChanged, IEnumerable<TElement> where TElement : class
+        private static IObservable<TResult> ObserveElementCore<TCollection, TElement, TResult>(TCollection source, Func<TElement, IObserver<TResult>?, IDisposable> subscribeAction) where TCollection : INotifyCollectionChanged, IEnumerable<TElement> where TElement : class
         {
             return Observable.Create((Func<IObserver<TResult>, IDisposable>)(observer =>
             {
                 var subscriptionCache = new Dictionary<object, IDisposable>();
-
-                static void Subscribe(IEnumerable<TElement> elements, IObserver<TResult> observer, Func<TElement, IObserver<TResult>, IDisposable> subscribeAction, Dictionary<object, IDisposable> subscriptionCache)
-                {
-                    foreach (var element in elements)
-                    {
-                        var disposable1 = subscribeAction(element, observer);
-                        subscriptionCache.Add(element, disposable1);
-                    }
-                }
-
-                static void UnsubscribeAll(Dictionary<object, IDisposable> subscriptionCache)
-                {
-                    foreach (var disposable1 in subscriptionCache.Values)
-                        disposable1.Dispose();
-                    subscriptionCache.Clear();
-                }
 
                 Subscribe(source, observer, subscribeAction, subscriptionCache);
                 var disposable = source.CollectionChangedAsObservable().Subscribe(x =>
@@ -58,6 +42,22 @@ namespace Rml
                     disposable.Dispose();
                     UnsubscribeAll(subscriptionCache);
                 });
+
+                static void Subscribe(IEnumerable<TElement> elements, IObserver<TResult> observer, Func<TElement, IObserver<TResult>?, IDisposable> subscribeAction, Dictionary<object, IDisposable> subscriptionCache)
+                {
+                    foreach (var element in elements)
+                    {
+                        var disposable1 = subscribeAction(element, observer);
+                        subscriptionCache.Add(element, disposable1);
+                    }
+                }
+
+                static void UnsubscribeAll(Dictionary<object, IDisposable> subscriptionCache)
+                {
+                    foreach (var disposable1 in subscriptionCache.Values)
+                        disposable1.Dispose();
+                    subscriptionCache.Clear();
+                }
             }));
         }
 
@@ -81,7 +81,7 @@ namespace Rml
             return ObserveElementCore<TCollection, TElement, (TElement element, TProperty property)>(source, (e, o) =>
             {
                 var observable = getObservableFunc(e);
-                return observable.Subscribe(oo => o.OnNext((e, oo)));
+                return observable.Subscribe(oo => o?.OnNext((e, oo)));
             });
         }
 
@@ -104,7 +104,7 @@ namespace Rml
             return ObserveElementCore<ReadOnlyObservableCollection<TElement>, TElement, (TElement element, TProperty property)>(source, (e, o) =>
             {
                 var observable = getObservableFunc(e);
-                return observable.Subscribe(oo => o.OnNext((e, oo)));
+                return observable.Subscribe(oo => o?.OnNext((e, oo)));
             });
         }
 
