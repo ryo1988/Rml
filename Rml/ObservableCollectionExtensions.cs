@@ -19,22 +19,6 @@ namespace Rml
             {
                 var subscriptionCache = new Dictionary<object, IDisposable>();
 
-                static void Subscribe(IEnumerable<TElement> elements, IObserver<TResult>? observer, Func<TElement, IObserver<TResult>?, IDisposable> subscribeAction, Dictionary<object, IDisposable> subscriptionCache)
-                {
-                    foreach (var element in elements)
-                    {
-                        var disposable1 = subscribeAction(element, observer);
-                        subscriptionCache.Add(element, disposable1);
-                    }
-                }
-
-                static void UnsubscribeAll(Dictionary<object, IDisposable> subscriptionCache)
-                {
-                    foreach (var disposable1 in subscriptionCache.Values)
-                        disposable1.Dispose();
-                    subscriptionCache.Clear();
-                }
-
                 Subscribe(source, observer, subscribeAction, subscriptionCache);
                 var disposable = source.CollectionChangedAsObservable().Subscribe(x =>
                 {
@@ -58,6 +42,22 @@ namespace Rml
                     disposable.Dispose();
                     UnsubscribeAll(subscriptionCache);
                 });
+
+                static void Subscribe(IEnumerable<TElement> elements, IObserver<TResult> observer, Func<TElement, IObserver<TResult>?, IDisposable> subscribeAction, Dictionary<object, IDisposable> subscriptionCache)
+                {
+                    foreach (var element in elements)
+                    {
+                        var disposable1 = subscribeAction(element, observer);
+                        subscriptionCache.Add(element, disposable1);
+                    }
+                }
+
+                static void UnsubscribeAll(Dictionary<object, IDisposable> subscriptionCache)
+                {
+                    foreach (var disposable1 in subscriptionCache.Values)
+                        disposable1.Dispose();
+                    subscriptionCache.Clear();
+                }
             }));
         }
 

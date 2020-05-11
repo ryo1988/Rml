@@ -48,7 +48,7 @@ namespace Rml
         /// <param name="disposeElement"></param>
         /// <returns></returns>
         // ReSharper disable once InconsistentNaming
-        public static ReadOnlyReactiveCollection<U> ToReadOnlyReactiveCollection<T, U>(this IObservable<T[]> self, Func<T[], U[]> converter, IScheduler? scheduler = null, bool disposeElement = true)
+        public static ReadOnlyReactiveCollection<U> ToReadOnlyReactiveCollection<T, U>(this IObservable<T[]?> self, Func<T[]?, U[]?> converter, IScheduler? scheduler = null, bool disposeElement = true)
         {
             var collectionChanged = self
                 .Select(o =>

@@ -44,12 +44,15 @@ namespace Rml
         /// <typeparam name="T"></typeparam>
         /// <param name="observable"></param>
         /// <returns></returns>
-        public static IObservable<IEnumerable<T>> DisposeBefore<T>(this IObservable<IEnumerable<T>> observable)
+        public static IObservable<IEnumerable<T>?> DisposeBefore<T>(this IObservable<IEnumerable<T>?> observable)
             where T : IDisposable
         {
             return observable
                 .DoBefore(o =>
                 {
+                    if (o is null)
+                        return;
+
                     foreach (var disposable in o)
                     {
                         disposable.Dispose();
@@ -63,12 +66,15 @@ namespace Rml
         /// <typeparam name="T"></typeparam>
         /// <param name="observable"></param>
         /// <returns></returns>
-        public static IObservable<T[]> DisposeBefore<T>(this IObservable<T[]> observable)
+        public static IObservable<T[]?> DisposeBefore<T>(this IObservable<T[]?> observable)
             where T : IDisposable
         {
             return observable
                 .DoBefore(o =>
                 {
+                    if (o is null)
+                        return;
+
                     foreach (var disposable in o)
                     {
                         disposable.Dispose();

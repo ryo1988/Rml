@@ -27,10 +27,13 @@ namespace Rml
         /// <param name="value"></param>
         /// <param name="destinationType"></param>
         /// <returns></returns>
-        public override object? ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+        public override object? ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object? value, Type destinationType)
         {
             if (destinationType == typeof(string))
             {
+                if (value is null)
+                    return null;
+
                 FieldInfo fi = value.GetType().GetField(value.ToString());
                 if (fi != null)
                 {
@@ -38,7 +41,7 @@ namespace Rml
                     return attributes.Length > 0 && !String.IsNullOrEmpty(attributes[0].Description) ? attributes[0].Description : value.ToString();
                 }
 
-                return string.Empty;
+                return null;
             }
 
             return base.ConvertTo(context, culture, value, destinationType);
@@ -51,11 +54,10 @@ namespace Rml
         /// <param name="culture"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public override object? ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        public override object? ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object? value)
         {
-            if (value is string)
+            if (value is string description)
             {
-                var description = (string)value;
                 foreach (var fi in EnumType.GetFields())
                 {
                     var attributes = (DescriptionAttribute[])fi.GetCustomAttributes(typeof(DescriptionAttribute), false);
