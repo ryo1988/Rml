@@ -50,11 +50,6 @@ namespace Rml
             return observable
                 .DoBefore(o =>
                 {
-                    if (o is null)
-                    {
-                        return;
-                    }
-
                     foreach (var disposable in o)
                     {
                         disposable.Dispose();
@@ -74,11 +69,6 @@ namespace Rml
             return observable
                 .DoBefore(o =>
                 {
-                    if (o is null)
-                    {
-                        return;
-                    }
-
                     foreach (var disposable in o)
                     {
                         disposable.Dispose();

@@ -19,7 +19,7 @@ namespace Rml
         /// <param name="scheduler"></param>
         /// <param name="disposeElement"></param>
         /// <returns></returns>
-        public static ReadOnlyReactiveCollection<T> ToReadOnlyReactiveCollection<T>(this IObservable<T[]> self, IScheduler? scheduler = null, bool disposeElement = true)
+        public static ReadOnlyReactiveCollection<T> ToReadOnlyReactiveCollection<T>(this IObservable<T[]?> self, IScheduler? scheduler = null, bool disposeElement = true)
         {
             return self
                 .Select(o =>

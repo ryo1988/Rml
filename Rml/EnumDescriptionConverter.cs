@@ -27,18 +27,15 @@ namespace Rml
         /// <param name="value"></param>
         /// <param name="destinationType"></param>
         /// <returns></returns>
-        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+        public override object? ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
             if (destinationType == typeof(string))
             {
-                if (value != null)
+                FieldInfo fi = value.GetType().GetField(value.ToString());
+                if (fi != null)
                 {
-                    FieldInfo fi = value.GetType().GetField(value.ToString());
-                    if (fi != null)
-                    {
-                        var attributes = (DescriptionAttribute[])fi.GetCustomAttributes(typeof(DescriptionAttribute), false);
-                        return attributes.Length > 0 && !String.IsNullOrEmpty(attributes[0].Description) ? attributes[0].Description : value.ToString();
-                    }
+                    var attributes = (DescriptionAttribute[])fi.GetCustomAttributes(typeof(DescriptionAttribute), false);
+                    return attributes.Length > 0 && !String.IsNullOrEmpty(attributes[0].Description) ? attributes[0].Description : value.ToString();
                 }
 
                 return string.Empty;
@@ -54,7 +51,7 @@ namespace Rml
         /// <param name="culture"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        public override object? ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             if (value is string)
             {

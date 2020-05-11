@@ -16,7 +16,7 @@ namespace Rml
         public static string ToDescription(this Enum value)
         {
             var converter = TypeDescriptor.GetConverter(value);
-            return converter.ConvertToString(value);
+            return converter.ConvertToString(value) ?? string.Empty;
         }
 
         /// <summary>
