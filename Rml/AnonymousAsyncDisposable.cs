@@ -8,8 +8,8 @@ namespace Rml
     /// </summary>
     public class AnonymousAsyncDisposable : IDisposable, IAsyncDisposable
     {
-        private readonly Action _action;
-        private readonly Func<ValueTask> _func;
+        private readonly Action? _action;
+        private readonly Func<ValueTask>? _func;
 
         /// <summary>
         /// 
@@ -34,7 +34,7 @@ namespace Rml
         {
             if (_action is null)
             {
-                _func().GetAwaiter().GetResult();
+                _func!().GetAwaiter().GetResult();
                 return;
             }
 
@@ -46,7 +46,7 @@ namespace Rml
         {
             if (_func is null)
             {
-                _action();
+                _action!();
                 return new ValueTask();
             }
 

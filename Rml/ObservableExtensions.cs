@@ -44,16 +44,14 @@ namespace Rml
         /// <typeparam name="T"></typeparam>
         /// <param name="observable"></param>
         /// <returns></returns>
-        public static IObservable<IEnumerable<T>> DisposeBefore<T>(this IObservable<IEnumerable<T>> observable)
+        public static IObservable<IEnumerable<T>?> DisposeBefore<T>(this IObservable<IEnumerable<T>?> observable)
             where T : IDisposable
         {
             return observable
                 .DoBefore(o =>
                 {
                     if (o is null)
-                    {
                         return;
-                    }
 
                     foreach (var disposable in o)
                     {
@@ -68,16 +66,14 @@ namespace Rml
         /// <typeparam name="T"></typeparam>
         /// <param name="observable"></param>
         /// <returns></returns>
-        public static IObservable<T[]> DisposeBefore<T>(this IObservable<T[]> observable)
+        public static IObservable<T[]?> DisposeBefore<T>(this IObservable<T[]?> observable)
             where T : IDisposable
         {
             return observable
                 .DoBefore(o =>
                 {
                     if (o is null)
-                    {
                         return;
-                    }
 
                     foreach (var disposable in o)
                     {
@@ -85,5 +81,14 @@ namespace Rml
                     }
                 });
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="o"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static IObservable<T> WhereNotNull<T>(this IObservable<T?> o) where T:class
+            => o.Where(x => x != null)!;
     }
 }
