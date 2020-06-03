@@ -16,10 +16,12 @@ namespace Rml
         /// <typeparam name="T"></typeparam>
         /// <param name="observable"></param>
         /// <param name="action"></param>
+        /// <param name="initialValue"></param>
         /// <returns></returns>
-        public static IObservable<T> DoBefore<T>(this IObservable<T> observable, Action<T> action)
+        public static IObservable<T> DoBefore<T>(this IObservable<T> observable, Action<T> action, T initialValue = default)
         {
             return observable
+                .StartWith(initialValue)
                 .Pairwise()
                 .Do(o => action(o.OldItem))
                 .Select(o => o.NewItem);
@@ -30,12 +32,13 @@ namespace Rml
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="observable"></param>
+        /// <param name="initialValue"></param>
         /// <returns></returns>
-        public static IObservable<T> DisposeBefore<T>(this IObservable<T> observable)
+        public static IObservable<T> DisposeBefore<T>(this IObservable<T> observable, T initialValue = default)
         where T : IDisposable
         {
             return observable
-                .DoBefore(o => o?.Dispose());
+                .DoBefore(o => o?.Dispose(), initialValue);
         }
 
         /// <summary>
@@ -43,8 +46,9 @@ namespace Rml
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="observable"></param>
+        /// <param name="initialValue"></param>
         /// <returns></returns>
-        public static IObservable<IEnumerable<T>?> DisposeBefore<T>(this IObservable<IEnumerable<T>?> observable)
+        public static IObservable<IEnumerable<T>?> DisposeBefore<T>(this IObservable<IEnumerable<T>?> observable, IEnumerable<T>? initialValue = default)
             where T : IDisposable
         {
             return observable
@@ -57,7 +61,7 @@ namespace Rml
                     {
                         disposable.Dispose();
                     }
-                });
+                }, initialValue);
         }
 
         /// <summary>
@@ -65,8 +69,9 @@ namespace Rml
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="observable"></param>
+        /// <param name="initialValue"></param>
         /// <returns></returns>
-        public static IObservable<T[]?> DisposeBefore<T>(this IObservable<T[]?> observable)
+        public static IObservable<T[]?> DisposeBefore<T>(this IObservable<T[]?> observable, T[]? initialValue = default)
             where T : IDisposable
         {
             return observable
@@ -79,7 +84,7 @@ namespace Rml
                     {
                         disposable.Dispose();
                     }
-                });
+                }, initialValue);
         }
 
         /// <summary>
