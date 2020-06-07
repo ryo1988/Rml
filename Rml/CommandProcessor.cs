@@ -24,7 +24,7 @@ namespace Rml
             Type Type { get; }
         }
 
-        private readonly Dictionary<Type, Func<ICommand, (Action undo, Action redo)>> _executes = new Dictionary<Type, Func<ICommand, (Action undo, Action redo)>>();
+        private readonly Dictionary<Type, Func<ICommand, (Action undo, Action redo, bool isExecuted)>> _executes = new Dictionary<Type, Func<ICommand, (Action undo, Action redo, bool isExecuted)>>();
         private readonly Stack<(Action undo, Action redo)> _undos = new Stack<(Action undo, Action redo)>();
         private readonly Stack<(Action undo, Action redo)> _redos = new Stack<(Action undo, Action redo)>();
         private readonly Subject<ICommand> _commandSubject;
@@ -57,7 +57,7 @@ namespace Rml
         /// <param name="execute"></param>
         /// <typeparam name="TCommand"></typeparam>
         /// <exception cref="ArgumentException"></exception>
-        public void Register<TCommand>(Func<TCommand, (Action undo, Action redo)> execute)
+        public void Register<TCommand>(Func<TCommand, (Action undo, Action redo, bool isExecuted)> execute)
             where TCommand : struct, ICommand
         {
             var command = new TCommand();
@@ -75,7 +75,7 @@ namespace Rml
         /// <typeparam name="TCommand"></typeparam>
         /// <typeparam name="TContext"></typeparam>
         /// <exception cref="ArgumentException"></exception>
-        public void Register<TCommand, TContext>(Func<TCommand, TContext, (Action undo, Action redo)> execute, TContext context)
+        public void Register<TCommand, TContext>(Func<TCommand, TContext, (Action undo, Action redo, bool isExecuted)> execute, TContext context)
             where TCommand : struct, ICommand
         {
             var command = new TCommand();
@@ -97,9 +97,10 @@ namespace Rml
             if (undoRedo == default)
                 return;
 
-            _undos.Push(undoRedo);
+            _undos.Push((undoRedo.undo, undoRedo.redo));
             _redos.Clear();
-            undoRedo.redo();
+            if (undoRedo.isExecuted is false)
+                undoRedo.redo();
             UpdateUndoRedoCount();
         }
 
