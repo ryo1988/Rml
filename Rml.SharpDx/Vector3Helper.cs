@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using System;
+using SharpDX;
 
 namespace Rml.SharpDx
 {
@@ -42,6 +43,14 @@ namespace Rml.SharpDx
             }
 
             return planeNormal;
+        }
+
+        public static Vector3 Round(this Vector3 from, int digit)
+        {
+            return new Vector3(
+                Math.Round(from.X, digit, MidpointRounding.AwayFromZero),
+                Math.Round(from.Y, digit, MidpointRounding.AwayFromZero),
+                Math.Round(from.Z, digit, MidpointRounding.AwayFromZero));
         }
     }
 }

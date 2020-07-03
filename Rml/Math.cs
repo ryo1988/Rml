@@ -11,26 +11,35 @@ namespace Rml
         /// 
         /// </summary>
         /// <param name="value"></param>
-        /// <param name="decimals"></param>
+        /// <param name="digits"></param>
         /// <param name="mode"></param>
         /// <returns></returns>
-        public static double Round(double value, int decimals, MidpointRounding mode)
+        public static float Round(float value, int digits, MidpointRounding mode)
         {
-            var pow = System.Math.Pow(10, decimals);
-            return System.Math.Round(value * pow, mode) / pow;
+            return (float) System.Math.Round(value, digits, mode);
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="digits"></param>
+        /// <param name="mode"></param>
+        /// <returns></returns>
+        public static double Round(double value, int digits, MidpointRounding mode)
+        {
+            return System.Math.Round(value, digits, mode);
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="value"></param>
-        /// <param name="decimals"></param>
+        /// <param name="digits"></param>
         /// <param name="mode"></param>
         /// <returns></returns>
-        public static int Round(int value, int decimals, MidpointRounding mode)
+        public static int Round(int value, int digits, MidpointRounding mode)
         {
-            var pow = System.Math.Pow(10, decimals);
-            return (int)(System.Math.Round(value * pow, mode) / pow);
+            return (int) System.Math.Round((double)value, digits, mode);
         }
     }
 }

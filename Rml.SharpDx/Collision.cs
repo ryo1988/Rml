@@ -1,5 +1,4 @@
-﻿using System;
-using SharpDX;
+﻿using SharpDX;
 
 namespace Rml.SharpDx
 {
@@ -21,7 +20,7 @@ namespace Rml.SharpDx
             var q = (l1P1.Y - l2P1.Y) * (l2P2.X - l2P1.X) - (l1P1.X - l2P1.X) * (l2P2.Y - l2P1.Y);
             var d = (l1P2.X - l1P1.X) * (l2P2.Y - l2P1.Y) - (l1P2.Y - l1P1.Y) * (l2P2.X - l2P1.X);
 
-            if (Math.Abs(d) < float.Epsilon)
+            if (System.Math.Abs(d) < float.Epsilon)
             {
                 return false;
             }
