@@ -4,8 +4,15 @@ using System.IO;
 
 namespace Rml
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public static class Util
     {
+        /// <summary>
+        /// .NetCore向けにBasePathを取得できるように
+        /// </summary>
+        /// <returns></returns>
         public static string GetBasePath()
         {
             var mainModuleFileName = Process.GetCurrentProcess().MainModule?.FileName;
