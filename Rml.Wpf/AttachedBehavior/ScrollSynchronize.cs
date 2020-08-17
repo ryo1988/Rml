@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace Rml.Wpf.AttachedBehavior
 {
@@ -48,7 +49,11 @@ namespace Rml.Wpf.AttachedBehavior
 
             if (scrollViewer is null)
             {
-                return;
+                scrollViewer = GetScrollViewer(d);
+                if (scrollViewer is null)
+                {
+                    return;
+                }
             }
 
             ScrollGroupChanged(scrollViewer);
@@ -73,7 +78,7 @@ namespace Rml.Wpf.AttachedBehavior
                     scrollViewers.Add(changedScrollViewer);
                     Groups.Add(changedScrollViewer, newGroup);
 
-                    SyncScroll(newGroup, changedScrollViewer);
+                    SyncScroll(newGroup, changedScrollViewer, true, true);
                 }
             }
         }
@@ -134,23 +139,47 @@ namespace Rml.Wpf.AttachedBehavior
         {
             var scrollViewer = (ScrollViewer)sender;
             var group = Groups[scrollViewer];
-            SyncScroll(group, scrollViewer);
+            SyncScroll(group, scrollViewer, e.HorizontalChange != 0.0, e.VerticalChange != 0.0);
         }
 
-        private static void SyncScroll(string group, ScrollViewer scrollViewer)
+        private static void SyncScroll(string group, ScrollViewer scrollViewer, bool isHorizontal, bool isVertical)
         {
             foreach (var viewer in ScrollViewers[group].Where(o => o != scrollViewer))
             {
-                if (GetEnableHorizontal(viewer))
+                if (isHorizontal && GetEnableHorizontal(viewer))
                 {
                     viewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset);
                 }
 
-                if (GetEnableVertical(viewer))
+                if (isVertical && GetEnableVertical(viewer))
                 {
                     viewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset);
                 }
             }
+        }
+
+        private static ScrollViewer GetScrollViewer(DependencyObject d)
+        {
+            var n = VisualTreeHelper.GetChildrenCount(d);
+            for (var i = 0; i < n; i++)
+            {
+                var child = VisualTreeHelper.GetChild(d, i) as FrameworkElement;
+                switch (child)
+                {
+                    case null:
+                        continue;
+                    case ScrollViewer scrollViewer:
+                        return scrollViewer;
+                }
+
+                var sv = GetScrollViewer(child);
+                if (sv != null)
+                {
+                    return sv;
+                }
+            }
+
+            return null;
         }
     }
 }
