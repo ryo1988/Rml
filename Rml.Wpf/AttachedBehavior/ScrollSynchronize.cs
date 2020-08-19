@@ -56,9 +56,9 @@ namespace Rml.Wpf.AttachedBehavior
                 }
             }
 
-            ScrollGroupChanged(scrollViewer);
+            Do(scrollViewer);
 
-            void ScrollGroupChanged(ScrollViewer changedScrollViewer)
+            void Do(ScrollViewer changedScrollViewer)
             {
                 if (string.IsNullOrEmpty(oldGroup) == false)
                 {
