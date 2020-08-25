@@ -39,7 +39,8 @@ namespace Rml
         /// <returns></returns>
         public static int Round(int value, int digits, MidpointRounding mode)
         {
-            return (int) System.Math.Round((double)value, digits, mode);
+            var pow = System.Math.Pow(10.0, digits);
+            return (int) (System.Math.Round(value / pow, digits, mode) * pow);
         }
     }
 }
