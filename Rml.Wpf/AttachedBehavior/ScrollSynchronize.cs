@@ -139,16 +139,27 @@ namespace Rml.Wpf.AttachedBehavior
         {
             var scrollViewer = (ScrollViewer)sender;
             var group = Groups[scrollViewer];
+            ScrollViewers[group].ForEach(o => o.ScrollChanged -= ScrollViewerOnScrollChanged);
             SyncScroll(group, scrollViewer, e.HorizontalChange != 0.0, e.VerticalChange != 0.0);
+            ScrollViewers[group].ForEach(o => o.ScrollChanged += ScrollViewerOnScrollChanged);
         }
 
         private static void SyncScroll(string group, ScrollViewer scrollViewer, bool isHorizontal, bool isVertical)
         {
+            var hOffset = scrollViewer.HorizontalOffset;
+            if (scrollViewer.Tag is double taggedOffset)
+            {
+                // タグにセットしたオフセットを再適用して謎のズレを回避する
+                hOffset = taggedOffset;
+                scrollViewer.ScrollToHorizontalOffset(hOffset);
+                scrollViewer.Tag = null;
+            }
+
             foreach (var viewer in ScrollViewers[group].Where(o => o != scrollViewer))
             {
                 if (isHorizontal && GetEnableHorizontal(viewer))
                 {
-                    viewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset);
+                    viewer.ScrollToHorizontalOffset(hOffset);
                 }
 
                 if (isVertical && GetEnableVertical(viewer))
