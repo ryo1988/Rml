@@ -55,11 +55,12 @@ namespace Rml
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
-        public ValueTask<TResponse[]> ExecuteAsync(TCall args)
+        public ValueTask<TResponse[]> ExecuteAsync(in TCall args)
         {
             lock(this)
             {
-                return ValueTaskEx.WhenAll(_callAndResponses.Select(o => o(args)));
+                var call = args;
+                return ValueTaskEx.WhenAll(_callAndResponses.Select(o => o(call)));
             }
         }
 
