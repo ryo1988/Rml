@@ -31,16 +31,16 @@ namespace Rml
         private readonly Subject<TCall> _callTrigger;
         private readonly Subject<TResponse> _responseTrigger;
         private readonly List<Func<TCall, ValueTask<TResponse>>> _callAndResponses = new List<Func<TCall, ValueTask<TResponse>>>();
-        private readonly AsyncLock _asyncLock;
+        private readonly AsyncLock? _asyncLock;
 
         /// <summary>
         /// 
         /// </summary>
-        public CallAndResponseCommand()
+        public CallAndResponseCommand(bool isParallelExecute = false)
         {
             _callTrigger = new Subject<TCall>().AddTo(Cd);
             _responseTrigger = new Subject<TResponse>().AddTo(Cd);
-            _asyncLock = new AsyncLock();
+            _asyncLock = isParallelExecute ? null : new AsyncLock();
             System.Reactive.Disposables.Disposable.Create(() =>
             {
                 lock (this)
@@ -57,11 +57,14 @@ namespace Rml
         /// <returns></returns>
         public ValueTask<TResponse[]> ExecuteAsync(in TCall args)
         {
-            lock(this)
+            Func<TCall, ValueTask<TResponse>>[] callAndResponses;
+            lock (this)
             {
-                var call = args;
-                return ValueTaskEx.WhenAll(_callAndResponses.Select(o => o(call)));
+                callAndResponses = _callAndResponses.ToArray();
             }
+            
+            var call = args;
+            return ValueTaskEx.WhenAll(callAndResponses.Select(o => o(call)));
         }
 
         /// <summary>
@@ -73,7 +76,17 @@ namespace Rml
         {
             var task = new Func<TCall, ValueTask<TResponse>>(async o =>
             {
+                if (_asyncLock is null)
+                {
+                    return await Do();
+                }
+                
                 using (await _asyncLock.LockAsync().ConfigureAwait(true))
+                {
+                    return await Do();
+                }
+
+                async ValueTask<TResponse> Do()
                 {
                     _callTrigger.OnNext(o);
                     var response = await callAndResponse(o).ConfigureAwait(true);
@@ -118,16 +131,16 @@ namespace Rml
         private readonly Subject<Unit> _callTrigger;
         private readonly Subject<TResponse> _responseTrigger;
         private readonly List<Func<ValueTask<TResponse>>> _callAndResponses = new List<Func<ValueTask<TResponse>>>();
-        private readonly AsyncLock _asyncLock;
+        private readonly AsyncLock? _asyncLock;
 
         /// <summary>
         /// 
         /// </summary>
-        public CallAndResponseCommand()
+        public CallAndResponseCommand(bool isParallelExecute = false)
         {
             _callTrigger = new Subject<Unit>().AddTo(Cd);
             _responseTrigger = new Subject<TResponse>().AddTo(Cd);
-            _asyncLock = new AsyncLock();
+            _asyncLock = isParallelExecute ? null : new AsyncLock();
             System.Reactive.Disposables.Disposable.Create(() =>
             {
                 lock (this)
@@ -143,10 +156,13 @@ namespace Rml
         /// <returns></returns>
         public ValueTask<TResponse[]> ExecuteAsync()
         {
-            lock(this)
+            Func<ValueTask<TResponse>>[] callAndResponses;
+            lock (this)
             {
-                return ValueTaskEx.WhenAll(_callAndResponses.Select(o => o()));
+                callAndResponses = _callAndResponses.ToArray();
             }
+            
+            return ValueTaskEx.WhenAll(callAndResponses.Select(o => o()));
         }
 
         /// <summary>
@@ -158,7 +174,17 @@ namespace Rml
         {
             var task = new Func<ValueTask<TResponse>>(async () =>
             {
+                if (_asyncLock is null)
+                {
+                    return await Do();
+                }
+                
                 using (await _asyncLock.LockAsync().ConfigureAwait(true))
+                {
+                    return await Do();
+                }
+
+                async ValueTask<TResponse> Do()
                 {
                     _callTrigger.OnNext(Unit.Default);
                     var response = await callAndResponse().ConfigureAwait(true);
