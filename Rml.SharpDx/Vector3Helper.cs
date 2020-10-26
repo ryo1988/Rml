@@ -52,5 +52,22 @@ namespace Rml.SharpDx
                 Math.Round(from.Y, digit, MidpointRounding.AwayFromZero),
                 Math.Round(from.Z, digit, MidpointRounding.AwayFromZero));
         }
+
+        public static bool IsRectangle(this Vector3[] positions)
+        {
+            if (positions.Length != 4)
+                return false;
+
+            if (System.Math.Abs(Angle(positions[0] - positions[1], positions[2] - positions[1]) - MathUtil.DegreesToRadians(90)) > 0.0001)
+                return false;
+
+            if (System.Math.Abs(Angle(positions[1] - positions[2], positions[3] - positions[2]) - MathUtil.DegreesToRadians(90)) > 0.0001)
+                return false;
+
+            if (System.Math.Abs(Angle(positions[2] - positions[3], positions[0] - positions[3]) - MathUtil.DegreesToRadians(90)) > 0.0001)
+                return false;
+
+            return true;
+        }
     }
 }
