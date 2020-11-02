@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+    <PropertyGroup>
+      <TargetFramework>netcoreapp3.1</TargetFramework>
+      <UseWPF>true</UseWPF>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="DotNetProjects.PrintEngine" Version="2.0.3" />
+      <PackageReference Include="System.Runtime.Caching" Version="4.7.0" />
+    </ItemGroup>
+
+</Project>
