@@ -47,17 +47,17 @@ namespace Rml.Wpf.Behavior
             base.OnAttached();
 
             var mouseDown = Observable.FromEvent<MouseButtonEventHandler, MouseButtonEventArgs>(
-                h => (s, e) => h(e),
+                h => (_, e) => h(e),
                 h => AssociatedObject.MouseDown += h,
                 h => AssociatedObject.MouseDown -= h);
 
             var mouseMove = Observable.FromEvent<MouseEventHandler, MouseEventArgs>(
-                h => (s, e) => h(e),
+                h => (_, e) => h(e),
                 h => AssociatedObject.MouseMove += h,
                 h => AssociatedObject.MouseMove -= h);
 
             var mouseUp = Observable.FromEvent<MouseButtonEventHandler, MouseButtonEventArgs>(
-                h => (s, e) => h(e),
+                h => (_, e) => h(e),
                 h => AssociatedObject.MouseUp += h,
                 h => AssociatedObject.MouseUp -= h);
 

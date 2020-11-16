@@ -73,7 +73,7 @@ namespace Rml.Wpf.DialogService
         private IDisposable BindCommand(ReactiveCommand command, int index, IDialogParameters parameters)
         {
             return command
-                .Do(o => parameters.Add(ConfirmationDialogParameters.ResultIndexKey, index))
+                .Do(_ => parameters.Add(ConfirmationDialogParameters.ResultIndexKey, index))
                 .Subscribe(_ => RequestClose(new DialogResult(ButtonResult.OK, parameters)));
         }
     }
