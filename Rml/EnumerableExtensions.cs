@@ -51,5 +51,27 @@ namespace Rml
         /// <returns></returns>
         public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> o) where T:class
             => o.Where(x => x != null)!;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="source"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static IEnumerable<(T previous,T current)> Pairwise<T>(this IEnumerable<T> source)
+        {
+            using var enumerator = source.GetEnumerator();
+
+            if (!enumerator.MoveNext())
+            {
+                yield break;
+            }
+            var previous = enumerator.Current;
+            while (enumerator.MoveNext())
+            {
+                yield return (previous, enumerator.Current);
+                previous = enumerator.Current;
+            }
+        }
     }
 }
