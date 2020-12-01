@@ -1,0 +1,58 @@
+﻿using System;
+using System.Threading;
+using System.Windows;
+using Prism.Services.Dialogs;
+
+namespace Rml.Wpf.DialogService
+{
+    /// <summary>
+    ///
+    /// </summary>
+    public static class DialogServiceExtensions
+    {
+        private static void InvokeUiThread(Action action)
+        {
+            if (Application.Current.Dispatcher != null && Application.Current.Dispatcher.Thread != Thread.CurrentThread)
+            {
+                Application.Current.Dispatcher.Invoke(action);
+            }
+            else
+            {
+                action();
+            }
+        }
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="dialogService"></param>
+        /// <param name="title"></param>
+        /// <param name="content"></param>
+        public static void Notification(this IDialogService dialogService, string title, object content)
+        {
+            InvokeUiThread(() => dialogService.ShowDialog(nameof(NotificationControl), new NotificationDialogParameters(title, content), null));
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="dialogService"></param>
+        /// <param name="title"></param>
+        /// <param name="content"></param>
+        /// <param name="choices"></param>
+        /// <param name="defaultIndex"></param>
+        /// <returns></returns>
+        public static int Contirmation(this IDialogService dialogService, string title, object content, object[] choices, int defaultIndex)
+        {
+            var result = -1;
+            InvokeUiThread(() => dialogService.ShowDialog(nameof(ConfirmationControl), new ConfirmationDialogParameters(title, content, choices, defaultIndex),
+                o => result = o.Parameters switch
+                {
+                    ConfirmationDialogParameters confirmationDialogParameters => confirmationDialogParameters
+                        .ResultIndex,
+                    _ => result
+                }));
+
+            return result;
+        }
+    }
+}

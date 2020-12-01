@@ -139,6 +139,7 @@
     </Compile>
     <Compile Include="DialogService\ConfirmationControlViewModel.cs" />
     <Compile Include="DialogService\ConfirmationDialogParameters.cs" />
+    <Compile Include="DialogService\DialogServiceExtensions.cs" />
     <Compile Include="DialogService\NotificationControl.xaml.cs">
       <DependentUpon>NotificationControl.xaml</DependentUpon>
     </Compile>
