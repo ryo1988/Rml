@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Reflection;
 using Microsoft.AppCenter.Analytics;
+using Microsoft.AppCenter.Crashes;
 
 namespace Rml.AppCenter
 {
@@ -37,6 +38,11 @@ namespace Rml.AppCenter
         public void TrackEvent(string name, params (string key, string value)[] properties)
         {
             Analytics.TrackEvent(name, properties.ToDictionary(o => o.key, o => o.value));
+        }
+
+        public void TrackError(Exception exception, params (string key, string value)[] properties)
+        {
+            Crashes.TrackError(exception, properties.ToDictionary(o => o.key, o => o.value));
         }
 
         public void TrackEvent(string name, string subName, object param, Type type)
