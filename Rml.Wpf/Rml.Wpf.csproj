@@ -158,6 +158,8 @@
     </Compile>
     <Compile Include="ProgressControlViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ResizeGrip\ResizeGripAdorner.cs" />
+    <Compile Include="ResizeGrip\ResizeGripBehavior.cs" />
     <Compile Include="UiDispatcherSchedulerHelper.cs" />
     <Compile Include="DispatcherYieldable.cs" />
   </ItemGroup>
@@ -183,7 +185,7 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ProgressControl.xaml" />
+    <Page Include="ResizeGrip\ResizeGripDornerStyle.xaml" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
