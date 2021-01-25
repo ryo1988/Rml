@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -130,25 +131,28 @@ namespace Rml.Wpf.ResizeGrip
         {
             var frameworkElement = AdornedElement as FrameworkElement ?? throw new InvalidOperationException();
 
-            var width = frameworkElement.Width;
-            var height = frameworkElement.Height;
-            if (width.Equals(Double.NaN))
-                width = frameworkElement.DesiredSize.Width;
-            if (height.Equals(Double.NaN))
-                height = frameworkElement.DesiredSize.Height;
+            var width = frameworkElement.Width.Equals(double.NaN) ? frameworkElement.DesiredSize.Width : frameworkElement.ActualWidth;
+            var height = frameworkElement.Height.Equals(double.NaN) ? frameworkElement.DesiredSize.Height : frameworkElement.ActualHeight;
 
             width += e.HorizontalChange;
             height += e.VerticalChange;
+
             width = System.Math.Max(_resizeGrip.Width, width);
             height = System.Math.Max(_resizeGrip.Height, height);
             width = System.Math.Max(frameworkElement.MinWidth, width);
             height = System.Math.Max(frameworkElement.MinHeight, height);
             width = System.Math.Min(frameworkElement.MaxWidth, width);
             height = System.Math.Min(frameworkElement.MaxHeight, height);
-
             frameworkElement.SetValue(WidthProperty, width);
             frameworkElement.SetValue(HeightProperty, height);
             frameworkElement.UpdateLayout();
+
+            var contentBounds = VisualTreeHelper.GetDescendantBounds(frameworkElement);
+            width = System.Math.Max(contentBounds.Right, width);
+            height = System.Math.Max(contentBounds.Bottom, height);
+            frameworkElement.SetValue(WidthProperty, width);
+            frameworkElement.SetValue(HeightProperty, height);
+            frameworkElement.InvalidateArrange();
         }
 
         private void ResizeGripOnMouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -158,7 +162,7 @@ namespace Rml.Wpf.ResizeGrip
             IsDragging = true;
             frameworkElement.SetValue(WidthProperty, double.NaN);
             frameworkElement.SetValue(HeightProperty, double.NaN);
-            frameworkElement.UpdateLayout();
+            frameworkElement.InvalidateArrange();
             IsDragging = false;
         }
 
@@ -175,6 +179,7 @@ namespace Rml.Wpf.ResizeGrip
         /// <inheritdoc />
         protected override Size ArrangeOverride(Size finalSize)
         {
+            Debug.WriteLine("ArrangeOverride");
             var frameworkElement = AdornedElement as FrameworkElement ?? throw new InvalidOperationException();
 
             var width = _resizeGrip.Width;
