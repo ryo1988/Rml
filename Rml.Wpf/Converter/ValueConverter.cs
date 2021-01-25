@@ -54,7 +54,7 @@ namespace Rml.Wpf.Converter
         /// <returns></returns>
         public virtual object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var converter = Converters.FirstOrDefault(o => o.From.Equals(value));
+            var converter = Converters.FirstOrDefault(o => Equals(o.From, value));
             if (converter == null)
             {
                 return value;
@@ -72,7 +72,7 @@ namespace Rml.Wpf.Converter
         /// <returns></returns>
         public virtual object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var converter = Converters.FirstOrDefault(o => o.To.Equals(value));
+            var converter = Converters.FirstOrDefault(o => Equals(o.To, value));
             if (converter == null)
             {
                 return value;
