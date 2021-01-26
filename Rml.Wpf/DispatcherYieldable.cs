@@ -29,7 +29,7 @@ namespace Rml.Wpf
             }
             
             // UIスレッドで処理している最中にUIを強制的に更新するため
-            await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
+            await Dispatcher.Yield(DispatcherPriority.Background);
         }
     }
 }
