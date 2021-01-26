@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -179,7 +178,6 @@ namespace Rml.Wpf.ResizeGrip
         /// <inheritdoc />
         protected override Size ArrangeOverride(Size finalSize)
         {
-            Debug.WriteLine("ArrangeOverride");
             var frameworkElement = AdornedElement as FrameworkElement ?? throw new InvalidOperationException();
 
             var width = _resizeGrip.Width;
