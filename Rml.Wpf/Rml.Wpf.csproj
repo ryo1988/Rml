@@ -126,6 +126,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AttachedBehavior\AttachedCommandBinding.cs" />
+    <Compile Include="Behavior\CanvasCenterBehavior.cs" />
     <Compile Include="Behavior\ListBoxSelectedItemsBehavior.cs" />
     <Compile Include="Behavior\ListViewSelectedItemsBehavior.cs" />
     <Compile Include="AttachedBehavior\ScrollSynchronize.cs" />
