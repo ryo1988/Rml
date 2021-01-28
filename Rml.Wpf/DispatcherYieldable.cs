@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Threading;
 
 namespace Rml.Wpf
@@ -16,7 +17,7 @@ namespace Rml.Wpf
         public async ValueTask Yield()
         {
             // UIスレッドでないなら、特に何もしない
-            if (Dispatcher.FromThread(Thread.CurrentThread) is null)
+            if (Thread.CurrentThread != Application.Current.Dispatcher.Thread)
                 return;
             
             // Dispatcher.Yieldを呼びすぎるとパフォーマンスが低下するので50msほど猶予を
@@ -29,7 +30,7 @@ namespace Rml.Wpf
             }
             
             // UIスレッドで処理している最中にUIを強制的に更新するため
-            await Dispatcher.Yield(DispatcherPriority.Background);
+            await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
         }
     }
 }
