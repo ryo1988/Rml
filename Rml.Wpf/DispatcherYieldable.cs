@@ -12,6 +12,16 @@ namespace Rml.Wpf
     public class DispatcherYieldable : IYieldable
     {
         private readonly Stopwatch _stopwatch = new Stopwatch();
+        private readonly DispatcherPriority _dispatcherPriority;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="dispatcherPriority"></param>
+        public DispatcherYieldable(DispatcherPriority dispatcherPriority)
+        {
+            _dispatcherPriority = dispatcherPriority;
+        }
 
         /// <inheritdoc />
         public async ValueTask Yield()
@@ -30,7 +40,7 @@ namespace Rml.Wpf
             }
             
             // UIスレッドで処理している最中にUIを強制的に更新するため
-            await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
+            await Dispatcher.Yield(_dispatcherPriority);
         }
     }
 }
