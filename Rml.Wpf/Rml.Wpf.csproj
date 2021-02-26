@@ -127,6 +127,7 @@
   <ItemGroup>
     <Compile Include="AttachedBehavior\AttachedCommandBinding.cs" />
     <Compile Include="Behavior\CanvasCenterBehavior.cs" />
+    <Compile Include="Behavior\DataGridSelectedItemsBehavior.cs" />
     <Compile Include="Behavior\ListBoxSelectedItemsBehavior.cs" />
     <Compile Include="Behavior\ListViewSelectedItemsBehavior.cs" />
     <Compile Include="AttachedBehavior\ScrollSynchronize.cs" />
@@ -148,7 +149,6 @@
     <Compile Include="DialogService\NotificationDialogParameters.cs" />
     <Compile Include="DisableAutomationPeer.cs" />
     <Compile Include="DisposableBindableBase.cs" />
-    <Compile Include="Behavior\DataGridSelectedItemBehavior.cs" />
     <Compile Include="BindingProxy.cs" />
     <Compile Include="Converter\EnumToBoolConverter.cs" />
     <Compile Include="Converter\ValueConverter.cs" />
