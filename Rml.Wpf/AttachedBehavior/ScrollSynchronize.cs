@@ -3,6 +3,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Xceed.Wpf.Toolkit.Core.Utilities;
 
 namespace Rml.Wpf.AttachedBehavior
 {
@@ -49,7 +50,7 @@ namespace Rml.Wpf.AttachedBehavior
 
             if (scrollViewer is null)
             {
-                scrollViewer = GetScrollViewer(d);
+                scrollViewer = GetScrollViewer(d as Visual);
                 if (scrollViewer is null)
                 {
                     return;
@@ -169,28 +170,9 @@ namespace Rml.Wpf.AttachedBehavior
             }
         }
 
-        private static ScrollViewer GetScrollViewer(DependencyObject d)
+        private static ScrollViewer GetScrollViewer(Visual visual)
         {
-            var n = VisualTreeHelper.GetChildrenCount(d);
-            for (var i = 0; i < n; i++)
-            {
-                var child = VisualTreeHelper.GetChild(d, i) as FrameworkElement;
-                switch (child)
-                {
-                    case null:
-                        continue;
-                    case ScrollViewer scrollViewer:
-                        return scrollViewer;
-                }
-
-                var sv = GetScrollViewer(child);
-                if (sv != null)
-                {
-                    return sv;
-                }
-            }
-
-            return null;
+            return VisualTreeHelperEx.FindDescendantByType<ScrollViewer>(visual);
         }
     }
 }
