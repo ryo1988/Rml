@@ -150,7 +150,6 @@
     <Compile Include="DialogService\NotificationDialogParameters.cs" />
     <Compile Include="DisableAutomationPeer.cs" />
     <Compile Include="DisposableBindableBase.cs" />
-    <Compile Include="Behavior\DataGridSelectedItemBehavior.cs" />
     <Compile Include="BindingProxy.cs" />
     <Compile Include="Converter\EnumToBoolConverter.cs" />
     <Compile Include="Converter\ValueConverter.cs" />
