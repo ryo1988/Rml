@@ -18,7 +18,7 @@ namespace Rml.Wpf
         ///
         /// </summary>
         /// <param name="dispatcherPriority"></param>
-        public DispatcherYieldable(DispatcherPriority dispatcherPriority)
+        public DispatcherYieldable(DispatcherPriority dispatcherPriority = DispatcherPriority.ApplicationIdle)
         {
             _dispatcherPriority = dispatcherPriority;
         }
