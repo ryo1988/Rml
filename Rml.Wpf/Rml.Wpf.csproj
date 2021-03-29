@@ -137,6 +137,7 @@
     <Compile Include="Behavior\WindowClosingBehavior.cs" />
     <Compile Include="Behavior\WindowEscCloseBehavior.cs" />
     <Compile Include="Converter\EnumLabelConverter.cs" />
+    <Compile Include="Converter\RoundValueConverter.cs" />
     <Compile Include="DialogService\ConfirmationControl.xaml.cs">
       <DependentUpon>ConfirmationControl.xaml</DependentUpon>
     </Compile>
