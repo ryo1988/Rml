@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 
 namespace Rml.Wpf.Converter
@@ -23,6 +19,11 @@ namespace Rml.Wpf.Converter
         /// <returns>変換後の出力値</returns>
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
+            if (parameter is not string)
+                throw new ArgumentException(nameof(parameter));
+            if (value is not double)
+                throw new ArgumentException(nameof(value));
+
             var setting = ((string)parameter).Split(':');
             var dValue = (double)value;
             return setting[0] switch
