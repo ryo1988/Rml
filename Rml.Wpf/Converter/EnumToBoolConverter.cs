@@ -11,6 +11,11 @@ namespace Rml.Wpf.Converter
     public class EnumToBoolConverter : IValueConverter
     {
         /// <summary>
+        /// falseの際の値
+        /// </summary>
+        public object FalseValue { get; set; } = DependencyProperty.UnsetValue;
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="value"></param>
@@ -53,7 +58,7 @@ namespace Rml.Wpf.Converter
 
             if ((bool)value == false)
             {
-                return DependencyProperty.UnsetValue;
+                return FalseValue;
             }
 
             return parameter;
