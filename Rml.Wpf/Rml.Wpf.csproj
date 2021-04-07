@@ -158,6 +158,7 @@
     <Compile Include="Converter\ValueConverter.cs" />
     <Compile Include="MarkupExtension\EnumValuesExtension.cs" />
     <Compile Include="Behavior\MouseDragBehavior.cs" />
+    <Compile Include="PrismEventExtensions.cs" />
     <Compile Include="ProgressControl.xaml.cs">
       <DependentUpon>ProgressControl.xaml</DependentUpon>
     </Compile>
