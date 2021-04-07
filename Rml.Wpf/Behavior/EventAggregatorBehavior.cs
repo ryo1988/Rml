@@ -46,6 +46,10 @@ namespace Rml.Wpf.Behavior
             base.OnAttached();
 
             _subscribeDisposable?.Dispose();
+
+            if (EventAggregator is null)
+                return;
+
             _subscribeDisposable = Subscribe();
         }
 
@@ -79,7 +83,7 @@ namespace Rml.Wpf.Behavior
         /// 
         /// </summary>
         /// <param name="threadOption"></param>
-        protected PubSubEventBehavior(ThreadOption threadOption)
+        protected PubSubEventBehavior(ThreadOption threadOption = ThreadOption.PublisherThread)
         {
             _threadOption = threadOption;
         }
@@ -113,7 +117,7 @@ namespace Rml.Wpf.Behavior
         /// 
         /// </summary>
         /// <param name="threadOption"></param>
-        protected PubSubEventBehavior(ThreadOption threadOption)
+        protected PubSubEventBehavior(ThreadOption threadOption = ThreadOption.PublisherThread)
         {
             _threadOption = threadOption;
         }
