@@ -18,7 +18,7 @@ namespace Rml
         /// <param name="action"></param>
         /// <param name="initialValue"></param>
         /// <returns></returns>
-        public static IObservable<T> DoBefore<T>(this IObservable<T> observable, Action<T> action, T initialValue = default)
+        public static IObservable<T?> DoBefore<T>(this IObservable<T?> observable, Action<T?> action, T? initialValue = default)
         {
             return observable
                 .StartWith(initialValue)
@@ -34,7 +34,7 @@ namespace Rml
         /// <param name="observable"></param>
         /// <param name="initialValue"></param>
         /// <returns></returns>
-        public static IObservable<T> DisposeBefore<T>(this IObservable<T> observable, T initialValue = default)
+        public static IObservable<T?> DisposeBefore<T>(this IObservable<T?> observable, T? initialValue = default)
         where T : IDisposable
         {
             return observable
