@@ -14,8 +14,9 @@ namespace Rml.Wpf
         /// </summary>
         /// <param name="container"></param>
         /// <param name="item"></param>
+        /// <param name="autoIsExpandChange">自動で開くか</param>
         /// <returns></returns>
-        public static TreeViewItem GetTreeViewItem(this ItemsControl container, object item)
+        public static TreeViewItem GetTreeViewItem(this ItemsControl container, object item, bool autoIsExpandChange)
         {
             if (container is null) return null;
 
@@ -24,7 +25,7 @@ namespace Rml.Wpf
                 return container as TreeViewItem;
             }
 
-            if (container is TreeViewItem treeViewItem && !treeViewItem.IsExpanded)
+            if (autoIsExpandChange && container is TreeViewItem treeViewItem && !treeViewItem.IsExpanded)
             {
                 treeViewItem.SetValue(TreeViewItem.IsExpandedProperty, true);
             }
@@ -73,13 +74,14 @@ namespace Rml.Wpf
 
                 if (subContainer is null) continue;
 
-                var resultContainer = GetTreeViewItem(subContainer, item);
+                var resultContainer = GetTreeViewItem(subContainer, item, autoIsExpandChange);
                 if (resultContainer is not null)
                 {
                     return resultContainer;
                 }
 
-                subContainer.IsExpanded = false;
+                if (autoIsExpandChange)
+                    subContainer.IsExpanded = false;
             }
 
             return null;
