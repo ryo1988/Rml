@@ -131,6 +131,7 @@
     <Compile Include="Behavior\CenterBehavior.cs" />
     <Compile Include="Behavior\DataGridSelectedItemsBehavior.cs" />
     <Compile Include="Behavior\FocusBindingBehavior.cs" />
+    <Compile Include="Behavior\ItemsControlZoomBehavior.cs" />
     <Compile Include="Behavior\ListBoxSelectedItemsBehavior.cs" />
     <Compile Include="Behavior\ListViewSelectedItemsBehavior.cs" />
     <Compile Include="AttachedBehavior\ScrollSynchronize.cs" />
