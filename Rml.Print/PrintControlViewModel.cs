@@ -1,26 +1,40 @@
 ﻿using System;
 using System.Linq;
 using System.Printing;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
+using Reactive.Bindings;
+using Reactive.Bindings.Extensions;
 using SUT.PrintEngine.Extensions;
 using SUT.PrintEngine.Paginators;
 using SUT.PrintEngine.Views;
+using Xceed.Wpf.Toolkit;
 using Xceed.Wpf.Toolkit.Core.Utilities;
+using MessageBox = System.Windows.MessageBox;
 
 namespace Rml.Print
 {
-    public class PrintControlViewModel : SUT.PrintEngine.ViewModels.PrintControlViewModel
+    public class PrintControlViewModel : SUT.PrintEngine.ViewModels.PrintControlViewModel, IDisposable
     {
+        private CompositeDisposable _cd;
+
+        private ReactivePropertySlim<double> ScaleProxy;
+
         public PrintControlViewModel(PrintControlView view)
             : base(view)
         {
-            LocalizationToJapanese(view);
+            _cd = new CompositeDisposable();
+            ScaleProxy = new ReactivePropertySlim<double>().AddTo(_cd);
+            LocalizationToJapanese(view).AddTo(_cd);
         }
 
-        private static void LocalizationToJapanese(PrintControlView view)
+        private IDisposable LocalizationToJapanese(PrintControlView view)
         {
+            var cd = new CompositeDisposable();
             {
                 var actualSizeButton = (Button) view.FindName("ActualSizeButton");
                 if (actualSizeButton is null)
@@ -93,25 +107,168 @@ namespace Rml.Print
 
                 menuItem.Header = "印刷サイズ";
 
+                var border = (Border) menuItem.Items.OfType<MenuItem>().Single().Header;
+                var stackPanel = GetChild<StackPanel>(border, 0);
+
                 var fitToPageCheckBox = (CheckBox) view.FindName("cb_FitToPage");
                 if (fitToPageCheckBox is null)
                     throw new InvalidOperationException();
-                fitToPageCheckBox.Content = "ページに合わせる";
+                fitToPageCheckBox.Content = "用紙にフィット";
 
-                var border = (Border) menuItem.Items.OfType<MenuItem>().Single().Header;
-                var smallLabel = GetChild<Label>(border, 0, 1, 0, 0, 0);
-                smallLabel.Content = "小さい";
-                var lessPagesLabel = GetChild<Label>(border, 0, 1, 0, 0, 1);
-                lessPagesLabel.Content = "少ないページ数";
-                var bigLabel = GetChild<Label>(border, 0, 1, 0, 1, 0);
-                bigLabel.Content = "大きい";
-                var morePagesLabel = GetChild<Label>(border, 0, 1, 0, 1, 1);
-                morePagesLabel.Content = "多いページ数";
-
+                var okCancelDockPanel = GetChild<DockPanel>(border, 0, 5);
                 var cancelButton = GetChild<Button>(border, 0, 5, 0);
                 cancelButton.Content = "キャンセル";
                 var applyButton = GetChild<Button>(border, 0, 5, 1);
                 applyButton.Content = "適用";
+
+                {
+                    var fitToPageCheckBoxGrid = GetChild<Grid>(stackPanel, 0);
+                    fitToPageCheckBoxGrid.Children.Remove(fitToPageCheckBox);
+
+                    stackPanel.Children.Clear();
+
+                    cancelButton.Visibility = Visibility.Collapsed;
+
+                    var grid = new Grid
+                    {
+                        ColumnDefinitions =
+                        {
+                            new ColumnDefinition
+                            {
+                                Width = GridLength.Auto,
+                            },
+                            new ColumnDefinition
+                            {
+                                Width = new GridLength(1.0, GridUnitType.Star),
+                            },
+                            new ColumnDefinition
+                            {
+                                Width = GridLength.Auto,
+                            },
+                            new ColumnDefinition
+                            {
+                                Width = new GridLength(1.0, GridUnitType.Star),
+                            },
+                        },
+                        RowDefinitions =
+                        {
+                            new RowDefinition(),
+                            new RowDefinition(),
+                            new RowDefinition(),
+                        },
+                    };
+                    stackPanel.Children.Add(grid);
+
+                    Grid.SetRow(fitToPageCheckBox, 0);
+                    Grid.SetColumn(fitToPageCheckBox, 0);
+                    Grid.SetColumnSpan(fitToPageCheckBox, 4);
+                    grid.Children.Add(fitToPageCheckBox);
+                    fitToPageCheckBox.HorizontalAlignment = HorizontalAlignment.Left;
+                    fitToPageCheckBox.HorizontalContentAlignment = HorizontalAlignment.Left;
+
+                    var titleTextBlock = new TextBlock
+                    {
+                        Text = "尺度"
+                    };
+                    Grid.SetRow(titleTextBlock, 1);
+                    Grid.SetColumn(titleTextBlock, 0);
+                    grid.Children.Add(titleTextBlock);
+
+                    var numeratorIntegerUpDown = new IntegerUpDown
+                    {
+                        Minimum = 1,
+                        Value = 1,
+                    };
+                    Grid.SetRow(numeratorIntegerUpDown, 1);
+                    Grid.SetColumn(numeratorIntegerUpDown, 1);
+                    grid.Children.Add(numeratorIntegerUpDown);
+                    Observable
+                        .FromEventPattern<MouseButtonEventHandler, MouseButtonEventArgs>(
+                            h => numeratorIntegerUpDown.MouseUp += h,
+                            h => numeratorIntegerUpDown.MouseUp -= h)
+                        .Subscribe(o => o.EventArgs.Handled = true)
+                        .AddTo(cd);
+
+                    var slashTextBlock = new TextBlock
+                    {
+                        Text = "/"
+                    };
+                    Grid.SetRow(slashTextBlock, 1);
+                    Grid.SetColumn(slashTextBlock, 2);
+                    grid.Children.Add(slashTextBlock);
+
+                    var denominatorIntegerUpDown = new IntegerUpDown
+                    {
+                        Minimum = 1,
+                        Value = 100,
+                    };
+                    Grid.SetRow(denominatorIntegerUpDown, 1);
+                    Grid.SetColumn(denominatorIntegerUpDown, 3);
+                    grid.Children.Add(denominatorIntegerUpDown);
+                    Observable
+                        .FromEventPattern<MouseButtonEventHandler, MouseButtonEventArgs>(
+                            h => denominatorIntegerUpDown.MouseUp += h,
+                            h => denominatorIntegerUpDown.MouseUp -= h)
+                        .Subscribe(o => o.EventArgs.Handled = true)
+                        .AddTo(cd);
+
+                    stackPanel.Children.Add(okCancelDockPanel);
+
+                    var numeratorIntegerUpDownValueChanged = Observable
+                        .FromEventPattern<RoutedPropertyChangedEventHandler<object>, object>(
+                            h => numeratorIntegerUpDown.ValueChanged += h,
+                            h => numeratorIntegerUpDown.ValueChanged -= h)
+                        .ToUnit();
+                    var denominatorIntegerUpDownValueChanged = Observable
+                        .FromEventPattern<RoutedPropertyChangedEventHandler<object>, object>(
+                            h => denominatorIntegerUpDown.ValueChanged += h,
+                            h => denominatorIntegerUpDown.ValueChanged -= h)
+                        .ToUnit();
+                    var fitToPageCheckBoxUnchecked = Observable
+                        .FromEventPattern<RoutedEventHandler, RoutedEventArgs>(
+                            h => fitToPageCheckBox.Unchecked += h,
+                            h => fitToPageCheckBox.Unchecked -= h)
+                        .ToUnit();
+
+                    Observable.Merge(numeratorIntegerUpDownValueChanged, denominatorIntegerUpDownValueChanged, fitToPageCheckBoxUnchecked)
+                        .Subscribe(_ =>
+                        {
+                            if ((numeratorIntegerUpDown.Value ?? 0) <= 0 ||
+                                (denominatorIntegerUpDown.Value ?? 0) <= 0)
+                                return;
+
+                            const double coefficient = /*dpi*/96.0 / /*inch to mm*/25.4 * /*value scale*/10.0;
+                            var scale = (double) numeratorIntegerUpDown.Value.Value /
+                                        denominatorIntegerUpDown.Value.Value * coefficient;
+                            SetCurrentValue(ScaleProperty, scale);
+                        })
+                        .AddTo(cd);
+
+                    var fitToPageCheckBoxChecked = Observable
+                        .FromEventPattern<RoutedEventHandler, RoutedEventArgs>(
+                            h => fitToPageCheckBox.Checked += h,
+                            h => fitToPageCheckBox.Checked -= h)
+                        .ToUnit();
+
+                    Observable
+                        .Merge(fitToPageCheckBoxChecked, fitToPageCheckBoxUnchecked)
+                        .Subscribe(_ =>
+                        {
+                            if (fitToPageCheckBox.IsChecked.HasValue && fitToPageCheckBox.IsChecked.Value)
+                            {
+                                numeratorIntegerUpDown.IsEnabled = false;
+                                slashTextBlock.IsEnabled = false;
+                                denominatorIntegerUpDown.IsEnabled = false;
+                            }
+                            else
+                            {
+                                numeratorIntegerUpDown.IsEnabled = true;
+                                slashTextBlock.IsEnabled = true;
+                                denominatorIntegerUpDown.IsEnabled = true;
+                            }
+                        })
+                        .AddTo(cd);
+                }
             }
 
             {
@@ -142,6 +299,8 @@ namespace Rml.Print
 
                 return (T) dependencyObject;
             }
+
+            return cd;
         }
 
         public PrintControlViewModel(Visual visual, Rect viewBox, Rect viewport)
@@ -194,6 +353,22 @@ namespace Rml.Print
             base.InitializeProperties();
 
             FullScreenPrintWindow.Title = "印刷プレビュー";
+        }
+
+        public override void HandlePropertyChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
+        {
+            base.HandlePropertyChanged(o, e);
+
+            if (e.Property == ScaleProperty)
+            {
+                ScaleProxy.Value = (double)e.NewValue;
+            }
+        }
+
+        public void Dispose()
+        {
+            _cd?.Dispose();
+            _cd = null;
         }
     }
 }
