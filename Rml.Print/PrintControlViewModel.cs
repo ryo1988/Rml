@@ -22,13 +22,13 @@ namespace Rml.Print
     {
         private CompositeDisposable _cd;
 
-        private ReactivePropertySlim<double> ScaleProxy;
+        public ReactivePropertySlim<double> BaseScale;
 
         public PrintControlViewModel(PrintControlView view)
             : base(view)
         {
             _cd = new CompositeDisposable();
-            ScaleProxy = new ReactivePropertySlim<double>().AddTo(_cd);
+            BaseScale = new ReactivePropertySlim<double>(1.0).AddTo(_cd);
             LocalizationToJapanese(view).AddTo(_cd);
         }
 
@@ -230,16 +230,20 @@ namespace Rml.Print
                             h => fitToPageCheckBox.Unchecked -= h)
                         .ToUnit();
 
-                    Observable.Merge(numeratorIntegerUpDownValueChanged, denominatorIntegerUpDownValueChanged, fitToPageCheckBoxUnchecked)
+                    Observable
+                        .Merge(numeratorIntegerUpDownValueChanged,
+                            denominatorIntegerUpDownValueChanged,
+                            fitToPageCheckBoxUnchecked,
+                            BaseScale.ToUnit())
                         .Subscribe(_ =>
                         {
                             if ((numeratorIntegerUpDown.Value ?? 0) <= 0 ||
                                 (denominatorIntegerUpDown.Value ?? 0) <= 0)
                                 return;
 
-                            const double coefficient = /*dpi*/96.0 / /*inch to mm*/25.4 * /*value scale*/10.0;
+                            const double coefficient = /*dpi*/96.0 / /*inch to mm*/25.4;
                             var scale = (double) numeratorIntegerUpDown.Value.Value /
-                                        denominatorIntegerUpDown.Value.Value * coefficient;
+                                        denominatorIntegerUpDown.Value.Value * coefficient * BaseScale.Value;
                             SetCurrentValue(ScaleProperty, scale);
                         })
                         .AddTo(cd);
@@ -353,16 +357,6 @@ namespace Rml.Print
             base.InitializeProperties();
 
             FullScreenPrintWindow.Title = "印刷プレビュー";
-        }
-
-        public override void HandlePropertyChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
-        {
-            base.HandlePropertyChanged(o, e);
-
-            if (e.Property == ScaleProperty)
-            {
-                ScaleProxy.Value = (double)e.NewValue;
-            }
         }
 
         public void Dispose()
