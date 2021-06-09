@@ -8,9 +8,13 @@ namespace Rml.Wpf.DialogService
     /// <summary>
     ///
     /// </summary>
-    public static class DialogServiceExtensions
+    public static class DialogServiceUtil
     {
-        private static void InvokeUiThread(Action action)
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="action"></param>
+        public static void InvokeUiThread(Action action)
         {
             if (Application.Current.Dispatcher != null && Application.Current.Dispatcher.Thread != Thread.CurrentThread)
             {
