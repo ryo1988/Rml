@@ -128,6 +128,8 @@ namespace Rml.Wpf.ResizeGrip
 
         private void ResizeGripOnDragDelta(object sender, DragDeltaEventArgs e)
         {
+            if (IsDragging is false) return;
+
             var frameworkElement = AdornedElement as FrameworkElement ?? throw new InvalidOperationException();
 
             var width = frameworkElement.Width.Equals(double.NaN) ? frameworkElement.DesiredSize.Width : frameworkElement.ActualWidth;
@@ -151,7 +153,6 @@ namespace Rml.Wpf.ResizeGrip
             height = System.Math.Max(contentBounds.Bottom, height);
             frameworkElement.SetValue(WidthProperty, width);
             frameworkElement.SetValue(HeightProperty, height);
-            frameworkElement.InvalidateArrange();
         }
 
         private void ResizeGripOnMouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -161,7 +162,6 @@ namespace Rml.Wpf.ResizeGrip
             IsDragging = true;
             frameworkElement.SetValue(WidthProperty, double.NaN);
             frameworkElement.SetValue(HeightProperty, double.NaN);
-            frameworkElement.InvalidateArrange();
             IsDragging = false;
         }
 
