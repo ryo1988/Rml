@@ -8,6 +8,8 @@
     xmlns:local="clr-namespace:Rml.Wpf.DialogService"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mvvm="http://prismlibrary.com/"
+    MaxWidth="500"
+    MaxHeight="500"
     d:DataContext="{d:DesignInstance local:ConfirmationControlViewModel}"
     d:DesignHeight="450"
     d:DesignWidth="800"
@@ -21,18 +23,22 @@
     <b:Interaction.Behaviors>
         <behavior:WindowEscCloseBehavior />
     </b:Interaction.Behaviors>
-    <Grid Margin="5">
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition />
+            <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <ContentControl
+        <ScrollViewer
             Grid.Row="0"
-            Content="{Binding Content}"
-            Focusable="False" />
+            Margin="25"
+            HorizontalScrollBarVisibility="Auto"
+            VerticalScrollBarVisibility="Auto">
+            <ContentPresenter Content="{Binding Content}" Focusable="False" />
+        </ScrollViewer>
         <ItemsControl
             x:Name="ButtonList"
             Grid.Row="1"
+            Margin="25,0,25,25"
             HorizontalAlignment="Center"
             BorderThickness="0"
             Focusable="False"

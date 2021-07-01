@@ -6,17 +6,30 @@
     xmlns:local="clr-namespace:Rml.Wpf.DialogService"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mvvm="http://prismlibrary.com/"
+    MaxWidth="500"
+    MaxHeight="500"
     d:DataContext="{d:DesignInstance local:NotificationControlViewModel}"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mvvm:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
-    <StackPanel FocusManager.FocusedElement="{Binding ElementName=OkButton}" Orientation="Vertical">
-        <ContentPresenter Margin="25" Content="{Binding Content}" />
+    <Grid FocusManager.FocusedElement="{Binding ElementName=OkButton}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <ScrollViewer
+            Grid.Row="0"
+            Margin="25"
+            HorizontalScrollBarVisibility="Auto"
+            VerticalScrollBarVisibility="Auto">
+            <ContentPresenter Content="{Binding Content}" />
+        </ScrollViewer>
         <Button
             x:Name="OkButton"
+            Grid.Row="1"
             Margin="25,0,25,25"
             Command="{Binding OkCommand}"
             Content="OK" />
-    </StackPanel>
+    </Grid>
 </UserControl>
