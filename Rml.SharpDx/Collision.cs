@@ -6,31 +6,33 @@ namespace Rml.SharpDx
     {
         public static bool LineIntersectsRectangle(Vector2 p1, Vector2 p2, RectangleF rectangle)
         {
-            return LineIntersectsLine(p1, p2, new Vector2(rectangle.X, rectangle.Y), new Vector2(rectangle.X + rectangle.Width, rectangle.Y)) ||
+            return LineIntersectsLine(p1, p2, new Vector2(rectangle.X, rectangle.Y), new Vector2(rectangle.X + rectangle.Width, rectangle.Y)).isIntersect ||
                    LineIntersectsLine(p1, p2, new Vector2(rectangle.X + rectangle.Width, rectangle.Y),
-                       new Vector2(rectangle.X + rectangle.Width, rectangle.Y + rectangle.Height)) ||
+                       new Vector2(rectangle.X + rectangle.Width, rectangle.Y + rectangle.Height)).isIntersect ||
                    LineIntersectsLine(p1, p2, new Vector2(rectangle.X + rectangle.Width, rectangle.Y + rectangle.Height),
-                       new Vector2(rectangle.X, rectangle.Y + rectangle.Height)) ||
-                   LineIntersectsLine(p1, p2, new Vector2(rectangle.X, rectangle.Y + rectangle.Height), new Vector2(rectangle.X, rectangle.Y)) ||
+                       new Vector2(rectangle.X, rectangle.Y + rectangle.Height)).isIntersect ||
+                   LineIntersectsLine(p1, p2, new Vector2(rectangle.X, rectangle.Y + rectangle.Height), new Vector2(rectangle.X, rectangle.Y)).isIntersect ||
                    LineContainsRectangle(p1, p2, rectangle);
         }
 
-        public static bool LineIntersectsLine(Vector2 l1P1, Vector2 l1P2, Vector2 l2P1, Vector2 l2P2)
+        public static (bool isIntersect, Vector2 intersection) LineIntersectsLine(Vector2 l1P1, Vector2 l1P2, Vector2 l2P1, Vector2 l2P2, float allowableLimit = float.Epsilon)
         {
-            var q = (l1P1.Y - l2P1.Y) * (l2P2.X - l2P1.X) - (l1P1.X - l2P1.X) * (l2P2.Y - l2P1.Y);
             var d = (l1P2.X - l1P1.X) * (l2P2.Y - l2P1.Y) - (l1P2.Y - l1P1.Y) * (l2P2.X - l2P1.X);
 
-            if (System.Math.Abs(d) < float.Epsilon)
+            if (System.Math.Abs(d) < allowableLimit)
             {
-                return false;
+                return (false, default);
             }
 
-            var r = q / d;
+            var u = ((l2P1.X - l1P1.X) * (l2P2.Y - l2P1.Y) - (l2P1.Y - l1P1.Y) * (l2P2.X - l2P1.X)) / d;
+            var v = ((l2P1.X - l1P1.X) * (l1P2.Y - l1P1.Y) - (l2P1.Y - l1P1.Y) * (l1P2.X - l1P1.X)) / d;
 
-            q = (l1P1.Y - l2P1.Y) * (l1P2.X - l1P1.X) - (l1P1.X - l2P1.X) * (l1P2.Y - l1P1.Y);
-            var s = q / d;
+            if (u < 0.0f - allowableLimit || u > 1.0f + allowableLimit || v < 0.0f - allowableLimit || v > 1.0f + allowableLimit)
+            {
+                return (false, default);
+            }
 
-            return !(r < 0) && !(r > 1) && !(s < 0) && !(s > 1);
+            return (true, new Vector2(l1P1.X + u * (l1P2.X - l1P1.X),  l1P1.Y + u * (l1P2.Y - l1P1.Y)));
         }
 
         public static bool LineContainsRectangle(Vector2 p1, Vector2 p2, RectangleF rectangle)

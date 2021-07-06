@@ -53,6 +53,13 @@ namespace Rml.SharpDx
                 Math.Round(from.Z, digit, MidpointRounding.AwayFromZero));
         }
 
+        public static Vector2 Round(this Vector2 from, int digit)
+        {
+            return new Vector2(
+                Math.Round(from.X, digit, MidpointRounding.AwayFromZero),
+                Math.Round(from.Y, digit, MidpointRounding.AwayFromZero));
+        }
+
         public static bool IsRectangle(this Vector3[] positions)
         {
             if (positions.Length != 4)
