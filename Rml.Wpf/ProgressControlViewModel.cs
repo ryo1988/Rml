@@ -69,9 +69,9 @@ namespace Rml.Wpf
         /// 
         /// </summary>
         /// <param name="service"></param>
-        public ProgressControlViewModel(ProgressService service)
+        public ProgressControlViewModel(IProgressService service)
         {
-            Progresses = service.Progresses
+            Progresses = service.GetProgresses()
                 .ToReadOnlyReactiveCollection(o => new ProgressViewModel(o))
                 .AddTo(Cd);
         }

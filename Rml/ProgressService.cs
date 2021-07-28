@@ -70,11 +70,29 @@ namespace Rml
         /// <returns></returns>
         ValueTask Yield();
     }
-    
+
     /// <summary>
     /// 
     /// </summary>
-    public class ProgressService
+    public interface IProgressService
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public ReadOnlyObservableCollection<Progress> GetProgresses();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public Progress Create(string label, int max = 0);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class ProgressService : IProgressService
     {
         /// <summary>
         /// 
@@ -93,7 +111,16 @@ namespace Rml
             _yieldable = yieldable;
             Progresses = new ReadOnlyObservableCollection<Progress>(_progresses);
         }
-        
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public ReadOnlyObservableCollection<Progress> GetProgresses()
+        {
+            return Progresses;
+        }
+
         /// <summary>
         /// 
         /// </summary>
