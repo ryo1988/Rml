@@ -242,8 +242,9 @@ namespace Rml.Print
                                 return;
 
                             const double coefficient = /*dpi*/96.0 / /*inch to mm*/25.4;
-                            var scale = (double) numeratorIntegerUpDown.Value.Value /
-                                        denominatorIntegerUpDown.Value.Value * coefficient * BaseScale.Value;
+                            var numerator = (double)numeratorIntegerUpDown.Value.Value;
+                            var denominator = (double)denominatorIntegerUpDown.Value.Value;
+                            var scale = numerator / denominator * coefficient * BaseScale.Value;
                             SetCurrentValue(ScaleProperty, scale);
                         })
                         .AddTo(cd);
@@ -357,6 +358,12 @@ namespace Rml.Print
             base.InitializeProperties();
 
             FullScreenPrintWindow.Title = "印刷プレビュー";
+        }
+
+        // 元の実装だと謎のマージンを入れられたので、マージンなしに
+        protected override void CreatePaginator(DrawingVisual visual, Size printSize)
+        {
+            this.Paginator = new VisualPaginator(visual, printSize, new Thickness(0), new Thickness(0));
         }
 
         public void Dispose()
