@@ -21,11 +21,15 @@
         <ItemsControl.ItemTemplate>
             <DataTemplate DataType="wpf:ProgressViewModel">
                 <Grid MinWidth="50">
-                    <ProgressBar
-                        IsIndeterminate="{Binding IsIndeterminate.Value, Mode=OneWay}"
-                        Maximum="{Binding Max.Value, Mode=OneWay}"
-                        Value="{Binding Current.Value, Mode=OneWay}" />
-                    <TextBlock HorizontalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ProgressBar Grid.Column="0" Grid.ColumnSpan="2"
+                                 IsIndeterminate="{Binding IsIndeterminate.Value, Mode=OneWay}"
+                                 Maximum="{Binding Max.Value, Mode=OneWay}"
+                                 Value="{Binding Current.Value, Mode=OneWay}" />
+                    <TextBlock Grid.Column="0" HorizontalAlignment="Center">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Style.Triggers>
@@ -41,12 +45,25 @@
                                         </Setter>
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding IsIndeterminate.Value}" Value="True">
-                                        <Setter Property="Text" Value="{Binding Label.Value, Mode=OneWay, StringFormat='{} {0} '}" />
+                                        <Setter Property="Text"
+                                                Value="{Binding Label.Value, Mode=OneWay, StringFormat='{} {0} '}" />
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </TextBlock.Style>
                     </TextBlock>
+                    <Button Grid.Column="1" Content="✕" HorizontalAlignment="Right" Command="{Binding CancelCommand}"
+                            Background="{x:Null}" BorderThickness="0" VerticalAlignment="Center">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding CancelCommand}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
                 </Grid>
             </DataTemplate>
         </ItemsControl.ItemTemplate>

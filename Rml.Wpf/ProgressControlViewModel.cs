@@ -31,6 +31,11 @@ namespace Rml.Wpf
         public ReadOnlyReactiveProperty<int> Current { get; }
 
         /// <summary>
+        ///
+        /// </summary>
+        public ReactiveCommand CancelCommand { get; }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="progress"></param>
@@ -51,6 +56,10 @@ namespace Rml.Wpf
             Current = progress.Current
                 .Sample(TimeSpan.FromMilliseconds(50))
                 .ToReadOnlyReactiveProperty()
+                .AddTo(Cd);
+            CancelCommand = progress.CanCancel ? new ReactiveCommand().AddTo(Cd) : null;
+            CancelCommand?
+                .Subscribe(_ => progress.Cancel())
                 .AddTo(Cd);
         }
     }

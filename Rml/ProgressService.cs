@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Threading;
 using System.Threading.Tasks;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
@@ -33,19 +34,38 @@ namespace Rml
         private readonly IYieldable _yieldable;
 
         /// <summary>
+        ///
+        /// </summary>
+        public readonly CancellationToken? CancellationToken;
+
+        private readonly CancellationTokenSource? _cancellationTokenSource;
+
+        /// <summary>
+        ///
+        /// </summary>
+        public bool CanCancel => CancellationToken is not null;
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="disposeAction"></param>
         /// <param name="yieldable"></param>
-        public Progress(Action<Progress> disposeAction, IYieldable yieldable)
+        /// <param name="isCancelable"></param>
+        public Progress(Action<Progress> disposeAction, IYieldable yieldable, bool isCancelable)
         {
             _yieldable = yieldable;
-            Cd.Add(System.Reactive.Disposables.Disposable.Create(() => disposeAction(this)));
+            _cancellationTokenSource = isCancelable ? new CancellationTokenSource() : null;
+            Cd.Add(System.Reactive.Disposables.Disposable.Create(() =>
+            {
+                _cancellationTokenSource?.Dispose();
+                disposeAction(this);
+            }));
             
             Label = new ReactivePropertySlim<string>().AddTo(Cd);
             IsIndeterminate = new ReactivePropertySlim<bool>().AddTo(Cd);
             Max = new ReactivePropertySlim<int>().AddTo(Cd);
             Current = new ReactivePropertySlim<int>().AddTo(Cd);
+            CancellationToken = _cancellationTokenSource?.Token;
         }
 
         /// <summary>
@@ -56,6 +76,14 @@ namespace Rml
         {
             Current.Value++;
             await _yieldable.Yield();
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public void Cancel()
+        {
+            _cancellationTokenSource?.Cancel();
         }
     }
 
@@ -86,7 +114,7 @@ namespace Rml
         /// 
         /// </summary>
         /// <returns></returns>
-        public Progress Create(string label, int max = 0);
+        public Progress Create(string label, bool isCancelable, int max = 0);
     }
 
     /// <summary>
@@ -125,13 +153,13 @@ namespace Rml
         /// 
         /// </summary>
         /// <returns></returns>
-        public Progress Create(string label, int max = 0)
+        public Progress Create(string label, bool isCancelable, int max = 0)
         {
             var progress = new Progress(o =>
             {
                 lock(this)
                     _progresses.Remove(o);
-            }, _yieldable)
+            }, _yieldable, isCancelable)
             {
                 Label = { Value = label},
                 Max = { Value = max},
