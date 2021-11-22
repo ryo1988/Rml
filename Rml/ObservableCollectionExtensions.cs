@@ -24,14 +24,14 @@ namespace Rml
                 {
                     if (x.Action == NotifyCollectionChangedAction.Remove || x.Action == NotifyCollectionChangedAction.Replace)
                     {
-                        foreach (var element in x.OldItems.Cast<TElement>())
+                        foreach (var element in x.OldItems?.Cast<TElement>() ?? Enumerable.Empty<TElement>())
                         {
                             subscriptionCache[element].Dispose();
                             subscriptionCache.Remove(element);
                         }
                     }
                     if (x.Action == NotifyCollectionChangedAction.Add || x.Action == NotifyCollectionChangedAction.Replace)
-                        Subscribe(x.NewItems.Cast<TElement>(), observer, subscribeAction, subscriptionCache);
+                        Subscribe(x.NewItems?.Cast<TElement>() ?? Enumerable.Empty<TElement>(), observer, subscribeAction, subscriptionCache);
                     if (x.Action != NotifyCollectionChangedAction.Reset)
                         return;
                     UnsubscribeAll(subscriptionCache);

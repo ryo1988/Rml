@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Globalization;
-using System.Reflection;
 
 namespace Rml
 {
@@ -27,14 +26,18 @@ namespace Rml
         /// <param name="value"></param>
         /// <param name="destinationType"></param>
         /// <returns></returns>
+#if NET6_0
+        public override object? ConvertTo(ITypeDescriptorContext? context, CultureInfo? culture, object? value, Type destinationType)
+#else
         public override object? ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object? value, Type destinationType)
+#endif
         {
             if (destinationType == typeof(string))
             {
                 if (value is null)
                     return null;
 
-                FieldInfo fi = value.GetType().GetField(value.ToString());
+                var fi = value.GetType().GetField(value.ToString() ?? throw new InvalidOperationException());
                 if (fi != null)
                 {
                     var attributes = (DescriptionAttribute[])fi.GetCustomAttributes(typeof(DescriptionAttribute), false);
@@ -54,7 +57,11 @@ namespace Rml
         /// <param name="culture"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public override object? ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object? value)
+#if NET6_0
+        public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
+#else
+        public override object? ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+#endif
         {
             if (value is string description)
             {

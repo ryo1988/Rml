@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Windows;
+﻿using System.Windows;
 using Microsoft.Xaml.Behaviors;
 
 namespace Rml.Wpf.AttachedBehavior

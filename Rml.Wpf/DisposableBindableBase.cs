@@ -1,6 +1,4 @@
-﻿using System;
-using System.Reactive.Disposables;
-using System.Threading;
+﻿using System.Reactive.Disposables;
 using Prism.Mvvm;
 
 namespace Rml.Wpf
