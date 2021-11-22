@@ -1,4 +1,6 @@
-﻿namespace Rml.Wpf.MarkupExtension
+﻿using System;
+
+namespace Rml.Wpf.MarkupExtension
 {
     /// <summary>
     /// 

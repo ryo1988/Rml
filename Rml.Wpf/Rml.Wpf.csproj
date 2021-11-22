@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
         <Nullable>disable</Nullable>
         <TargetFrameworks>net472;net5.0-windows;net6.0-windows</TargetFrameworks>

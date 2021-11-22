@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System;
+using System.Threading;
+using System.Windows;
 using Prism.Services.Dialogs;
 
 namespace Rml.Wpf.DialogService

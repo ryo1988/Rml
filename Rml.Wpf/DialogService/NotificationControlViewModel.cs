@@ -1,4 +1,5 @@
-﻿using Prism.Services.Dialogs;
+﻿using System;
+using Prism.Services.Dialogs;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 
