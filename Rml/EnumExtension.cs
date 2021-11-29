@@ -13,7 +13,7 @@ namespace Rml
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static string? ToDescription(this Enum value)
+        public static string ToDescription(this Enum value)
         {
             var converter = TypeDescriptor.GetConverter(value);
             return converter.ConvertToString(value) ?? string.Empty;
