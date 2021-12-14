@@ -27,7 +27,7 @@ namespace Rml.Sharepoint
             return clientContext;
         }
 
-        public static async Task<Folder> GetSharepointRootFolder(ClientContext clientContext)
+        public static async Task<Folder> GetRootFolder(ClientContext clientContext)
         {
             clientContext.Load(clientContext.Web, p => p.Title);
             await clientContext.ExecuteQueryAsync();
