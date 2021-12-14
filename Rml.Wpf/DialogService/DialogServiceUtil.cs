@@ -58,5 +58,12 @@ namespace Rml.Wpf.DialogService
 
             return result;
         }
+
+        public static T GetValue<T>(this IDialogResult dialogResult, string propertyName)
+        {
+            return dialogResult.Parameters?.TryGetValue<T>(propertyName, out var parameter) ?? false
+                ? parameter
+                : default;
+        }
     }
 }
