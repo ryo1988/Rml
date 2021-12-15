@@ -28,9 +28,9 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
-    <PackageReference Include="ReactiveProperty" Version="8.0.2" />
-    <PackageReference Include="System.Interactive" Version="5.0.0" />
-    <PackageReference Include="System.Linq.Async" Version="5.0.0" />
+    <PackageReference Include="ReactiveProperty" Version="8.0.3" />
+    <PackageReference Include="System.Interactive" Version="5.1.0" />
+    <PackageReference Include="System.Linq.Async" Version="5.1.0" />
     <PackageReference Include="ValueTaskSupplement" Version="1.1.0" />
   </ItemGroup>
 
