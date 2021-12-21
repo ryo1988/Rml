@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.SharePoint.Client;
 using File = Microsoft.SharePoint.Client.File;
@@ -43,6 +44,26 @@ namespace Rml.Sharepoint
             return list.RootFolder;
         }
 
+        public static async Task<(Folder fileFolder, string fileName)> GetPathFolderAndFileName(Folder folder, string path)
+        {
+            var fileName = path.Split("\\").TakeLast(1).Single();
+            var folderPaths = path.Split("\\").SkipLast(1);
+            foreach (var pathItem in folderPaths)
+            {
+                folder.Context.Load(folder, o => o.Folders);
+                await folder.Context.ExecuteQueryAsync();
+                folder = folder.Folders.FirstOrDefault(o => o.Name == pathItem) ?? await folder.CreateFolderAsync(pathItem);
+            }
+
+            return (folder, fileName);
+        }
+
+        public static async Task<File> GetFileAsync(Folder folder, string path)
+        {
+            var (fileFolder, fileName) = await GetPathFolderAndFileName(folder, path);
+            return await fileFolder.GetFileAsync(fileName);
+        }
+
         public static async Task<Stream> PullFileStream(File file)
         {
             var memoryStream = new MemoryStream();
@@ -61,7 +82,8 @@ namespace Rml.Sharepoint
 
         public static async Task<File> PushFileStream(Folder folder, string path, Stream stream)
         {
-            var uploadFile = await folder.UploadFileAsync(path, stream, true);
+            var (fileFolder, fileName) = await GetPathFolderAndFileName(folder, path);
+            var uploadFile = await fileFolder.UploadFileAsync(fileName, stream, true);
             if (uploadFile is null) throw new InvalidOperationException();
 
             return uploadFile;
