@@ -43,15 +43,13 @@ namespace Rml.Sharepoint
             return list.RootFolder;
         }
 
-        public static async Task<Stream> PullFileStream(Folder folder, string path)
+        public static async Task<Stream> PullFileStream(File file)
         {
-            var file = await folder.GetFileAsync(path);
-
             var memoryStream = new MemoryStream();
             if (file is not null)
             {
                 var openBinaryStream = file.OpenBinaryStream();
-                await folder.Context.ExecuteQueryAsync();
+                await file.Context.ExecuteQueryAsync();
                 await using var stream = openBinaryStream.Value;
                 await stream.CopyToAsync(memoryStream);
             }
