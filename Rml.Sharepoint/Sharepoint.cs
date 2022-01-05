@@ -46,8 +46,8 @@ namespace Rml.Sharepoint
 
         public static async Task<(Folder fileFolder, string fileName)> GetPathFolderAndFileName(Folder folder, string path)
         {
-            var fileName = path.Split("\\").TakeLast(1).Single();
-            var folderPaths = path.Split("\\").SkipLast(1);
+            var fileName = path.Split('\\', '/').TakeLast(1).Single();
+            var folderPaths = path.Split('\\', '/').SkipLast(1);
             foreach (var pathItem in folderPaths)
             {
                 folder.Context.Load(folder, o => o.Folders);
