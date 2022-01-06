@@ -18,7 +18,20 @@ namespace Rml.Wpf.DialogService
         {
             if (Application.Current.Dispatcher != null && Application.Current.Dispatcher.Thread != Thread.CurrentThread)
             {
-                Application.Current.Dispatcher.Invoke(action);
+                Exception invokeException = null;
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    try
+                    {
+                        action();
+                    }
+                    catch (Exception e)
+                    {
+                        invokeException = e;
+                    }
+                });
+                if (invokeException is not null)
+                    throw new System.Reflection.TargetInvocationException(invokeException);
             }
             else
             {
