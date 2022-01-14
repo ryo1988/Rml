@@ -9,7 +9,7 @@ namespace Rml.Sharepoint
 {
     public static class Sharepoint
     {
-        public static async Task<ClientContext> GetClientContextAsync(string url, string token)
+        public static async Task<ClientContext?> GetClientContextAsync(string url, string token)
         {
             var clientContext = new ClientContext(url);
             clientContext.ExecutingWebRequest += (_, args) =>
@@ -28,7 +28,7 @@ namespace Rml.Sharepoint
             return clientContext;
         }
 
-        public static async Task<Folder> GetRootFolder(ClientContext clientContext)
+        public static async Task<Folder?> GetRootFolder(ClientContext clientContext)
         {
             clientContext.Load(clientContext.Web, p => p.Title);
             await clientContext.ExecuteQueryAsync();
@@ -58,7 +58,7 @@ namespace Rml.Sharepoint
             return (folder, fileName);
         }
 
-        public static async Task<File> GetFileAsync(Folder folder, string path)
+        public static async Task<File?> GetFileAsync(Folder folder, string path)
         {
             var (fileFolder, fileName) = await GetPathFolderAndFileName(folder, path);
             return await fileFolder.GetFileAsync(fileName);
@@ -67,13 +67,10 @@ namespace Rml.Sharepoint
         public static async Task<Stream> PullFileStream(File file)
         {
             var memoryStream = new MemoryStream();
-            if (file is not null)
-            {
-                var openBinaryStream = file.OpenBinaryStream();
-                await file.Context.ExecuteQueryAsync();
-                await using var stream = openBinaryStream.Value;
-                await stream.CopyToAsync(memoryStream);
-            }
+            var openBinaryStream = file.OpenBinaryStream();
+            await file.Context.ExecuteQueryAsync();
+            await using var stream = openBinaryStream.Value;
+            await stream.CopyToAsync(memoryStream);
 
             memoryStream.Position = 0;
 
