@@ -32,8 +32,9 @@ namespace Rml
         /// <param name="fromPath"></param>
         /// <param name="toPath"></param>
         /// <param name="copySubDirectory"></param>
+        /// <param name="overwrite"></param>
         /// <exception cref="DirectoryNotFoundException"></exception>
-        public static void CopyDirectory(string fromPath, string toPath, bool copySubDirectory)
+        public static void CopyDirectory(string fromPath, string toPath, bool copySubDirectory, bool overwrite)
         {
             var directoryInfo = new DirectoryInfo(fromPath);
             if (directoryInfo.Exists is false)
@@ -44,7 +45,8 @@ namespace Rml
             foreach (var fileInfo in directoryInfo.GetFiles())
             {
                 var toFilePath = Path.Combine(toPath, fileInfo.Name);
-                fileInfo.CopyTo(toFilePath);
+                if (overwrite || File.Exists(toFilePath) is false)
+                    fileInfo.CopyTo(toFilePath, overwrite);
             }
 
             if (copySubDirectory is false)
@@ -53,7 +55,7 @@ namespace Rml
             foreach (var directory in directoryInfo.GetDirectories())
             {
                 var toDirectoryPath = Path.Combine(toPath, directory.Name);
-                CopyDirectory(directory.FullName, toDirectoryPath, copySubDirectory);
+                CopyDirectory(directory.FullName, toDirectoryPath, copySubDirectory, overwrite);
             }
         }
     }
