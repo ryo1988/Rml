@@ -11,12 +11,12 @@ namespace Rml.Auth
         private static readonly Dictionary<(string clientId, string tenantId), IPublicClientApplication> Applications =
             new();
 
-        public static async Task<AuthenticationResult> AuthMsalAsync(string url, string clientId, string tenantId, IAccount account, CancellationToken cancellationToken)
+        public static async Task<AuthenticationResult> AuthMsalAsync(string url, string clientId, string tenantId, IAccount? account, CancellationToken cancellationToken)
         {
             var uri = new Uri(url);
             var scope = $"{uri.Scheme}://{uri.Authority}//AllSites.Manage";
 
-            IPublicClientApplication publicClientApplication;
+            IPublicClientApplication? publicClientApplication;
             if (Applications.TryGetValue((clientId, tenantId), out publicClientApplication) is false)
             {
                 publicClientApplication = PublicClientApplicationBuilder

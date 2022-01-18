@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net5.0;net6.0;netstandard2.0</TargetFrameworks>
+        <TargetFrameworks>net5.0-windows;net6.0-windows;netstandard2.0</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.AppCenter.Analytics" Version="3.4.2" />
-      <PackageReference Include="Microsoft.AppCenter.Crashes" Version="3.4.2" />
+      <PackageReference Include="Microsoft.AppCenter.Analytics" Version="4.4.0" />
+      <PackageReference Include="Microsoft.AppCenter.Crashes" Version="4.4.0" />
     </ItemGroup>
 
     <ItemGroup>
