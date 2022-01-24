@@ -49,6 +49,17 @@ namespace Rml
         /// <param name="value"></param>
         /// <param name="mode"></param>
         /// <returns></returns>
+        public static int RoundInt(this float value, MidpointRounding mode = MidpointRounding.AwayFromZero)
+        {
+            return (int)Round(value, 0, mode);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="mode"></param>
+        /// <returns></returns>
         public static int RoundInt(this double value, MidpointRounding mode = MidpointRounding.AwayFromZero)
         {
             return (int)Round(value, 0, mode);
