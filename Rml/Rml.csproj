@@ -4,17 +4,15 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Nullable>enable</Nullable>
     <Authors>ryo1988</Authors>
-    <Company>ryo1988</Company>
     <Description>Rml</Description>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
-    <Version>0.3.0.0</Version>
-    <PackageLicenseUrl></PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/ryo1988/Rml</PackageProjectUrl>
+    <Version>0.5.0.0</Version>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/ryo1988/Rml</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
     <Product>Rml</Product>
-    <Copyright>Copyright (c) 2017 ryo1988</Copyright>
     <PackageId>Rml</PackageId>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <TargetFrameworks>net5.0;net6.0;netstandard2.0;netstandard2.1</TargetFrameworks>
   </PropertyGroup>
 
@@ -32,13 +30,6 @@
     <PackageReference Include="System.Interactive" Version="5.1.0" />
     <PackageReference Include="System.Linq.Async" Version="5.1.0" />
     <PackageReference Include="ValueTaskSupplement" Version="1.1.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
   </ItemGroup>
 
 </Project>
