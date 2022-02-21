@@ -154,6 +154,17 @@ namespace Rml
             UpdateUndoRedoCount();
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        public void ClearUndoRedo()
+        {
+            _undos.Clear();
+            _redos.Clear();
+
+            UpdateUndoRedoCount();
+        }
+
         private void UpdateUndoRedoCount()
         {
             UndoCount.Value = _undos.Count;
