@@ -15,6 +15,14 @@
     d:DesignWidth="800"
     mvvm:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
+    <mvvm:Dialog.WindowStyle>
+        <Style TargetType="Window">
+            <Setter Property="mvvm:Dialog.WindowStartupLocation" Value="CenterOwner" />
+            <Setter Property="Topmost" Value="True" />
+            <Setter Property="ResizeMode" Value="NoResize" />
+            <Setter Property="SizeToContent" Value="WidthAndHeight" />
+        </Style>
+    </mvvm:Dialog.WindowStyle>
     <UserControl.Style>
         <Style>
             <Setter Property="local:ConfirmationControl.DefaultIndex" Value="{Binding DefaultIndex, Mode=OneWay}" />
