@@ -133,14 +133,15 @@ public static class DataObjectHelper
         }
     }
 
-    public static object GetData(System.Windows.IDataObject dataObject, string format, bool autoConvert)
+    public static object? GetData(System.Windows.IDataObject dataObject, string format, bool autoConvert)
     {
         switch (format)
         {
             case "FileGroupDescriptor":
             {
-                var memoryStream = dataObject.GetData("FileGroupDescriptor", autoConvert) as MemoryStream ??
-                                   throw new InvalidOperationException();
+                var memoryStream = dataObject.GetData("FileGroupDescriptor", autoConvert) as MemoryStream;
+                if (memoryStream is null)
+                    return null;
                 var span = memoryStream.ToArray().AsSpan();
                 var fileGroupDescriptor = MemoryMarshal.AsRef<Windows.FileGroupDescriptor>(span);
 
