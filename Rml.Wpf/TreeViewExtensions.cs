@@ -52,6 +52,9 @@ namespace Rml.Wpf
 
             var virtualizingPanel = itemsHostPanel as VirtualizingStackPanel;
 
+            var containerIsExpanded = (container as TreeViewItem)?.IsExpanded;
+
+            TreeViewItem resultContainer = null;
             for (int i = 0, count = container.Items.Count; i < count; i++)
             {
                 TreeViewItem subContainer;
@@ -74,17 +77,23 @@ namespace Rml.Wpf
 
                 if (subContainer is null) continue;
 
-                var resultContainer = GetTreeViewItem(subContainer, item, autoIsExpandChange);
-                if (resultContainer is not null)
-                {
-                    return resultContainer;
-                }
+                resultContainer = GetTreeViewItem(subContainer, item, autoIsExpandChange);
 
                 if (autoIsExpandChange)
                     subContainer.IsExpanded = false;
+
+                if (resultContainer is not null)
+                {
+                    break;
+                }
             }
 
-            return null;
+            if (containerIsExpanded is not null)
+            {
+                ((TreeViewItem)container).IsExpanded = containerIsExpanded.Value;
+            }
+
+            return resultContainer;
         }
     }
 }
