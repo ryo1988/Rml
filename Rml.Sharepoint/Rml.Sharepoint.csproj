@@ -6,8 +6,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.SharePointOnline.CSOM" Version="16.1.21909.12000" />
-      <PackageReference Include="PnP.Framework" Version="1.7.0" />
+      <PackageReference Include="Microsoft.SharePointOnline.CSOM" Version="16.1.22518.12000" />
+      <PackageReference Include="PnP.Framework" Version="1.9.0" />
     </ItemGroup>
 
 </Project>

@@ -28,7 +28,7 @@ namespace Rml.Sharepoint
             return clientContext;
         }
 
-        public static async Task<Folder?> GetRootFolder(ClientContext clientContext)
+        public static async Task<Folder?> GetRootFolder(ClientContext clientContext, bool forceCheckOut)
         {
             clientContext.Load(clientContext.Web, p => p.Title);
             await clientContext.ExecuteQueryAsync();
@@ -37,6 +37,8 @@ namespace Rml.Sharepoint
             await clientContext.ExecuteQueryAsync();
 
             var list = clientContext.Web.Lists.GetByTitle("ドキュメント");
+            list.ForceCheckout = forceCheckOut;
+            list.Update();
             clientContext.Load(list);
             clientContext.Load(list.RootFolder);
             await clientContext.ExecuteQueryAsync();

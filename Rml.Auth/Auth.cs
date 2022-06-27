@@ -32,19 +32,19 @@ namespace Rml.Auth
             {
                 if (account is null)
                 {
-                    return await AcquireTokenInteractive();
+                    return await Task.Run(AcquireTokenInteractive, cancellationToken);
                 }
 
-                return await AcquireTokenSilent();
+                return await Task.Run(AcquireTokenSilent, cancellationToken);
             }
             catch (MsalUiRequiredException ex)
             {
                 System.Diagnostics.Debug.WriteLine($"MsalUiRequiredException: {ex.Message}");
 
-                return await AcquireTokenInteractive();
+                return await Task.Run(AcquireTokenInteractive, cancellationToken);
             }
 
-            async ValueTask<AuthenticationResult> AcquireTokenSilent()
+            async Task<AuthenticationResult> AcquireTokenSilent()
             {
                 return await publicClientApplication
                     .AcquireTokenSilent(new[]
@@ -54,7 +54,7 @@ namespace Rml.Auth
                     .ExecuteAsync(cancellationToken);
             }
 
-            async ValueTask<AuthenticationResult> AcquireTokenInteractive()
+            async Task<AuthenticationResult> AcquireTokenInteractive()
             {
                 if (account is null)
                 {
