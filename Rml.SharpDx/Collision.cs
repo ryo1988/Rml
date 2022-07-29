@@ -17,6 +17,18 @@ namespace Rml.SharpDx
 
         public static (bool isIntersect, Vector2 intersection) LineIntersectsLine(Vector2 l1P1, Vector2 l1P2, Vector2 l2P1, Vector2 l2P2, float allowableLimit = float.Epsilon)
         {
+            if (l1P1.NearEqual(l2P1, allowableLimit))
+                return (true, l1P1);
+            
+            if (l1P1.NearEqual(l2P2, allowableLimit))
+                return (true, l1P1);
+            
+            if (l1P2.NearEqual(l2P1, allowableLimit))
+                return (true, l1P2);
+            
+            if (l1P2.NearEqual(l2P2, allowableLimit))
+                return (true, l1P2);
+
             var d = (l1P2.X - l1P1.X) * (l2P2.Y - l2P1.Y) - (l1P2.Y - l1P1.Y) * (l2P2.X - l2P1.X);
 
             if (System.Math.Abs(d) < allowableLimit)
