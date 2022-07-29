@@ -160,8 +160,15 @@ namespace Rml.Wpf.ResizeGrip
             var frameworkElement = AdornedElement as FrameworkElement ?? throw new InvalidOperationException();
 
             IsDragging = true;
-            frameworkElement.SetValue(WidthProperty, double.NaN);
-            frameworkElement.SetValue(HeightProperty, double.NaN);
+            if (!double.IsNaN(frameworkElement.Height))
+            {
+                frameworkElement.SetValue(HeightProperty, double.NaN);
+            }
+            else
+            {
+                frameworkElement.SetValue(WidthProperty, double.NaN);
+                frameworkElement.SetValue(HeightProperty, double.NaN);
+            }
             IsDragging = false;
         }
 
