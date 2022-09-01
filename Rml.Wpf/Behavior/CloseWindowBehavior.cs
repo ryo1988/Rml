@@ -6,9 +6,9 @@ using Reactive.Bindings.Extensions;
 
 namespace Rml.Wpf.Behavior;
 
-public class ActivateWindowBehavior : EventAggregatorBehavior<FrameworkElement>
+public class CloseWindowBehavior : EventAggregatorBehavior<FrameworkElement>
 {
-    public class ActivateWindowEvent : PubSubEvent
+    public class CloseWindowEvent : PubSubEvent
     {
     }
 
@@ -17,15 +17,15 @@ public class ActivateWindowBehavior : EventAggregatorBehavior<FrameworkElement>
         var cd = new CompositeDisposable();
 
         EventAggregator
-            .GetEvent<ActivateWindowEvent>()
-            .Subscribe(ActivateWindow)
+            .GetEvent<CloseWindowEvent>()
+            .Subscribe(CloseWindow)
             .AddTo(cd);
 
         return cd;
     }
 
-    private void ActivateWindow()
+    private void CloseWindow()
     {
-        (AssociatedObject as Window ?? Window.GetWindow(AssociatedObject))?.Activate();
+        (AssociatedObject as Window ?? Window.GetWindow(AssociatedObject))?.Close();
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace Rml
 {
@@ -57,6 +59,13 @@ namespace Rml
                 var toDirectoryPath = Path.Combine(toPath, directory.Name);
                 CopyDirectory(directory.FullName, toDirectoryPath, copySubDirectory, overwrite);
             }
+        }
+
+        public static int GetIndex<T>(IEnumerable<T> from, Func<T, bool> equalKey)
+        {
+            return from
+                .Select((o, i) => (value: o, index: i))
+                .Single(o => equalKey(o.value)).index;
         }
     }
 }
