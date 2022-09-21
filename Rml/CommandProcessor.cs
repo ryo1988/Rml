@@ -29,14 +29,17 @@ namespace Rml
         private readonly Stack<(Action undo, Action redo)> _redos = new Stack<(Action undo, Action redo)>();
         private readonly Subject<ICommand> _commandSubject;
 
+        private readonly ReactivePropertySlim<int> _undoCount;
+        private readonly ReactivePropertySlim<int> _redoCount;
+
         /// <summary>
         /// 
         /// </summary>
-        public readonly ReactivePropertySlim<int> UndoCount;
+        public readonly ReadOnlyReactivePropertySlim<int> UndoCount;
         /// <summary>
         /// 
         /// </summary>
-        public readonly ReactivePropertySlim<int> RedoCount;
+        public readonly ReadOnlyReactivePropertySlim<int> RedoCount;
         /// <summary>
         /// 
         /// </summary>
@@ -45,9 +48,11 @@ namespace Rml
         /// <inheritdoc />
         public CommandProcessor()
         {
+            _undoCount = new ReactivePropertySlim<int>().AddTo(Cd);
+            _redoCount = new ReactivePropertySlim<int>().AddTo(Cd);
             _commandSubject = new Subject<ICommand>().AddTo(Cd);
-            UndoCount = new ReactivePropertySlim<int>().AddTo(Cd);
-            RedoCount = new ReactivePropertySlim<int>().AddTo(Cd);
+            UndoCount = _undoCount.ToReadOnlyReactivePropertySlim().AddTo(Cd);
+            RedoCount = _redoCount.ToReadOnlyReactivePropertySlim().AddTo(Cd);
             CommandObservable = _commandSubject.AsObservable();
         }
 
@@ -167,8 +172,8 @@ namespace Rml
 
         private void UpdateUndoRedoCount()
         {
-            UndoCount.Value = _undos.Count;
-            RedoCount.Value = _redos.Count;
+            _undoCount.Value = _undos.Count;
+            _redoCount.Value = _redos.Count;
         }
     }
 }
