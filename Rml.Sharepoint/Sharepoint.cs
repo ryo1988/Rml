@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.SharePoint.Client;
 using Nito.AsyncEx;
+using Nito.Disposables;
 using File = Microsoft.SharePoint.Client.File;
 
 namespace Rml.Sharepoint
@@ -20,6 +21,131 @@ namespace Rml.Sharepoint
         private static readonly Dictionary<ClientContext, Folder> RootFolders = new();
 
         private static readonly Dictionary<ClientRuntimeContext, AsyncLock> ClientContextLocks = new();
+
+        private static readonly AsyncLock EntityCacheLock = new();
+        private static readonly Dictionary<Folder, Dictionary<string, ClientObject>> EntityCache = new();
+        private static readonly Dictionary<ClientObject, Folder> EntityFolderCache = new();
+
+        private static async ValueTask<Dictionary<string, ClientObject>> GetEntitiesInternal(Folder folder, bool useLock)
+        {
+            using (useLock ? await EntityCacheLock.LockAsync() : Disposable.Create(null))
+            {
+                if (EntityCache.TryGetValue(folder, out var entities) is false)
+                {
+                    var folders = folder.Folders;
+                    var files = folder.Files;
+                    
+                    folder.Context.Load(folders, o => o.Include(oo => oo.Name));
+                    folder.Context.Load(files, o => o.Include(oo => oo.Name));
+                    await folder.Context.ExecuteQueryRetryAsync();
+
+                    entities = folders.AsEnumerable()
+                        .Select(o => (name:o.Name, value:(ClientObject)o))
+                        .Concat(files.AsEnumerable().Select(o => (name:o.Name, value:(ClientObject)o)))
+                        .ToDictionary(o => o.name, o => o.value);
+                    
+                    EntityCache.Add(folder, entities);
+                    foreach (var keyValuePair in entities)
+                    {
+                        EntityFolderCache.Add(keyValuePair.Value, folder);
+                    }
+                }
+
+                return entities;
+            }
+        }
+        
+        private static async ValueTask<ClientObject?> GetEntity(Folder folder, string name)
+        {
+            using (await EntityCacheLock.LockAsync())
+            {
+                var entities = await GetEntitiesInternal(folder, false);
+                return entities.TryGetValue(name, out var entity) ? entity : null;
+            }
+        }
+
+        private static async ValueTask ClearEntityCache(ClientObject clientObject)
+        {
+            using (await EntityCacheLock.LockAsync())
+            {
+                switch (clientObject)
+                {
+                    case Folder folder:
+                    {
+                        if (EntityCache.Remove(folder, out var entities))
+                        {
+                            foreach (var keyValuePair in entities)
+                            {
+                                EntityFolderCache.Remove(keyValuePair.Value);
+                            }
+                        }
+                    }
+                        break;
+                    case File file:
+                    {
+                        if (EntityFolderCache.Remove(file, out var parentFolder))
+                        {
+                            if (EntityCache.TryGetValue(parentFolder, out var entities))
+                            {
+                                entities[file.Name] = file;
+                            }
+                            
+                            EntityFolderCache.Add(file, parentFolder);
+                        }
+                    }
+                        break;
+                    default:
+                        throw new ArgumentException();
+                }
+            }
+        }
+
+        public static async ValueTask ClearEntityCache()
+        {
+            var disposables = await ClientContextLocks
+                .Select(async o => await o.Value.LockAsync())
+                .WhenAll();
+            
+            using (new CollectionDisposable(disposables))
+            {
+                using (await EntityCacheLock.LockAsync())
+                {
+                    EntityCache.Clear();
+                    EntityFolderCache.Clear();
+                }
+            }
+        }
+
+        private static async ValueTask<bool> IsLocked(File? file, bool useLock)
+        {
+            if (file is null)
+                return false;
+
+            using (useLock ? await ClientContextLocks[file.Context].LockAsync() : Disposable.Create(null))
+            {
+                file.Context.Load(file, o => o.CheckedOutByUser);
+                await file.Context.ExecuteQueryRetryAsync();
+            }
+
+            return file.CheckedOutByUser.ServerObjectIsNull switch
+            {
+                false => true,
+                true => false,
+                _ => throw new InvalidOperationException(),
+            };
+        }
+
+        private static async ValueTask UpdateLockedFile(File file, bool useLock)
+        {
+            using (useLock ? await ClientContextLocks[file.Context].LockAsync() : Disposable.Create(null))
+            {
+                file.CheckIn("", CheckinType.MajorCheckIn);
+                file.CheckOut();
+                await file.Context.ExecuteQueryRetryAsync();
+                await ClearEntityCache(file);
+            }
+        }
+        
         public static async ValueTask<ClientContext?> GetClientContextAsync(string url, string userAgent, string token)
         {
             using (await ClientContextsLock.LockAsync())
@@ -86,12 +212,15 @@ namespace Rml.Sharepoint
             {
                 using (await ClientContextLocks[folder.Context].LockAsync())
                 {
-                    folder.Context.Load(folder, o => o.Folders);
-                    await folder.Context.ExecuteQueryRetryAsync();
+                    var currentFolder = await GetEntity(folder, pathItem) as Folder;
+                    if (currentFolder is null)
+                    {
+                        currentFolder = await folder.CreateFolderAsync(pathItem);
+                        await ClearEntityCache(folder);
+                    }
+
+                    folder = currentFolder;
                 }
-                
-                folder = folder.Folders.FirstOrDefault(o => o.Name == pathItem) ??
-                         await folder.CreateFolderAsync(pathItem);
             }
 
             return (folder, fileName);
@@ -103,14 +232,12 @@ namespace Rml.Sharepoint
             File? file;
             using (await ClientContextLocks[folder.Context].LockAsync())
             {
-                fileFolder.Context.Load(fileFolder, o => o.Files);
-                await fileFolder.Context.ExecuteQueryRetryAsync();
-
-                file = fileFolder.Files.SingleOrDefault(o => o.Name == fileName);
+                file = await GetEntity(fileFolder, fileName) as File;
                 if (createWhenNotExist && file is null)
                 {
                     await using var stream = new MemoryStream();
                     file = await fileFolder.UploadFileAsync(fileName, stream, false);
+                    await ClearEntityCache(fileFolder);
                 }
             }
 
@@ -126,6 +253,8 @@ namespace Rml.Sharepoint
             {
                 getFile.DeleteObject();
                 await getFile.Context.ExecuteQueryRetryAsync();
+                await ClearEntityCache(folder);
+                await ClearEntityCache(getFile);
             }
         }
 
@@ -137,9 +266,10 @@ namespace Rml.Sharepoint
             {
                 openBinaryStream = file.OpenBinaryStream();
                 await file.Context.ExecuteQueryRetryAsync();
+                
+                await using var stream = openBinaryStream.Value;
+                await stream.CopyToAsync(memoryStream);
             }
-            await using var stream = openBinaryStream.Value;
-            await stream.CopyToAsync(memoryStream);
 
             memoryStream.Position = 0;
 
@@ -153,6 +283,11 @@ namespace Rml.Sharepoint
             using (await ClientContextLocks[folder.Context].LockAsync())
             {
                 uploadFile = await fileFolder.UploadFileAsync(fileName, stream, true);
+                if (await IsLocked(uploadFile, false))
+                {
+                    await UpdateLockedFile(uploadFile, false);
+                }
+                await ClearEntityCache(fileFolder);
             }
             if (uploadFile is null) throw new InvalidOperationException();
 
@@ -167,11 +302,15 @@ namespace Rml.Sharepoint
             {
                 using (await ClientContextLocks[folder.Context].LockAsync())
                 {
-                    folder.Context.Load(folder, o => o.Folders);
-                    await folder.Context.ExecuteQueryRetryAsync();
+                    var currentFolder = await GetEntity(folder, pathItem) as Folder;
+                    if (currentFolder is null)
+                    {
+                        currentFolder = await folder.CreateFolderAsync(pathItem);
+                        await ClearEntityCache(folder);
+                    }
+
+                    folder = currentFolder;
                 }
-                folder = folder.Folders.FirstOrDefault(o => o.Name == pathItem) ??
-                         await folder.CreateFolderAsync(pathItem);
             }
 
             return folder;
@@ -184,12 +323,7 @@ namespace Rml.Sharepoint
             var currentFolder = folder;
             foreach (var pathItem in folderPaths)
             {
-                using (await ClientContextLocks[folder.Context].LockAsync())
-                {
-                    currentFolder.Context.Load(currentFolder, o => o.Folders);
-                    await currentFolder.Context.ExecuteQueryRetryAsync();
-                }
-                currentFolder = currentFolder.Folders.FirstOrDefault(o => o.Name == pathItem);
+                currentFolder = await GetEntity(currentFolder, pathItem) as Folder;
 
                 if (currentFolder is null)
                     break;
@@ -208,42 +342,21 @@ namespace Rml.Sharepoint
             {
                 getFolder.DeleteObject();
                 await getFolder.Context.ExecuteQueryRetryAsync();
+                await ClearEntityCache(folder);
             }
         }
 
         public static async ValueTask<string[]> GetEntities(Folder folder)
         {
-            using (await ClientContextLocks[folder.Context].LockAsync())
-            {
-                folder.Context.Load(folder, o => o.Folders);
-                folder.Context.Load(folder, o => o.Files);
-                await folder.Context.ExecuteQueryRetryAsync();
-            }
-
-            return folder.Folders
-                .Select(o => o.Name)
-                .Concat(folder.Files.Select(o => o.Name))
+            return (await GetEntitiesInternal(folder, true))
+                .Select(o => o.Key)
                 .ToArray();
         }
 
         public static async ValueTask<bool> IsLocked(Folder folder, string path)
         {
             var file = await GetFileAsync(folder, path, false);
-            if (file is null)
-                return false;
-
-            using (await ClientContextLocks[folder.Context].LockAsync())
-            {
-                file.Context.Load(file, o => o.CheckedOutByUser);
-                await file.Context.ExecuteQueryRetryAsync();
-            }
-
-            return file.CheckedOutByUser.ServerObjectIsNull switch
-            {
-                false => true,
-                true => false,
-                _ => throw new InvalidOperationException(),
-            };
+            return await IsLocked(file, true);
         }
 
         public static async ValueTask<bool> Lock(Folder folder, string path)
@@ -256,6 +369,7 @@ namespace Rml.Sharepoint
             {
                 file.CheckOut();
                 await file.Context.ExecuteQueryRetryAsync();
+                await ClearEntityCache(file);
             }
 
             return true;
@@ -271,6 +385,7 @@ namespace Rml.Sharepoint
             {
                 file.CheckIn("", CheckinType.MajorCheckIn);
                 await file.Context.ExecuteQueryRetryAsync();
+                await ClearEntityCache(file);
             }
 
             return true;
