@@ -368,7 +368,14 @@ namespace Rml.Sharepoint
             using (await ClientContextLocks[folder.Context].LockAsync())
             {
                 file.CheckOut();
-                await file.Context.ExecuteQueryRetryAsync();
+                try
+                {
+                    await file.Context.ExecuteQueryRetryAsync();
+                }
+                catch
+                {
+                    return false;
+                }
                 await ClearEntityCache(file);
             }
 
@@ -384,7 +391,14 @@ namespace Rml.Sharepoint
             using (await ClientContextLocks[folder.Context].LockAsync())
             {
                 file.CheckIn("", CheckinType.MajorCheckIn);
-                await file.Context.ExecuteQueryRetryAsync();
+                try
+                {
+                    await file.Context.ExecuteQueryRetryAsync();
+                }
+                catch
+                {
+                    return false;
+                }
                 await ClearEntityCache(file);
             }
 
