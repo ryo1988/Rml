@@ -359,7 +359,7 @@ namespace Rml.Sharepoint
             return await IsLocked(file, true);
         }
 
-        public static async ValueTask<bool> Lock(Folder folder, string path)
+        public static async ValueTask<bool> Lock(Folder folder, string path, bool force)
         {
             var file = await GetFileAsync(folder, path, true);
             if (file is null)
@@ -367,6 +367,9 @@ namespace Rml.Sharepoint
 
             using (await ClientContextLocks[folder.Context].LockAsync())
             {
+                if (force)
+                    file.UndoCheckOut();
+                
                 file.CheckOut();
                 try
                 {
@@ -403,6 +406,32 @@ namespace Rml.Sharepoint
             }
 
             return true;
+        }
+
+        public static async ValueTask<string?> GetLockedInfo(Folder folder, string path)
+        {
+            var file = await GetFileAsync(folder, path, true);
+            if (file is null)
+                throw new InvalidOperationException();
+
+            using (await ClientContextLocks[folder.Context].LockAsync())
+            {
+                try
+                {
+                    file.Context.Load(file.CheckedOutByUser,
+                        o => o.Title, o => o.LoginName);
+                    await file.Context.ExecuteQueryRetryAsync();
+
+                    if (file.CheckedOutByUser.ServerObjectIsNull is true)
+                        return null;
+
+                    return file.CheckedOutByUser.Title;
+                }
+                catch
+                {
+                    return null;
+                }
+            }
         }
     }
 }
