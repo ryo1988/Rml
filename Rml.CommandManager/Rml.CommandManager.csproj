@@ -4,6 +4,15 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>false</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <Authors>ryo1988</Authors>
+        <Description>Rml.CommandManager</Description>
+        <PackageProjectUrl>https://github.com/ryo1988/Rml</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryUrl>https://github.com/ryo1988/Rml</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Version>0.1.0</Version>
+        <Copyright>Copyright (c) ryo1988</Copyright>
     </PropertyGroup>
 
 </Project>
