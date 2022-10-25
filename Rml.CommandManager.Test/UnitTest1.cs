@@ -25,12 +25,20 @@ public readonly partial record struct Command : ICommand
     public ReadOnlyMemory<byte> RedoParamBin { get; init; }
 }
 
+public class Tag
+{
+    public Guid Uid;
+    public string? Name;
+}
+
 public class Personal
 {
     public int Age;
     public string? Name;
     public string? Class;
     public bool IsRegistered;
+    public List<Tag> Tags = new List<Tag>();
+    public string? Format;
 }
 
 // シリアライザにあわせてシリアライズ可能な定義
@@ -97,6 +105,56 @@ public readonly partial record struct UpdateClass(string? Class) : IUndoRedoComm
     }
 }
 
+[MemoryPackable]
+[CommandManagerCommand(4)]
+public readonly partial record struct AddTags((Guid Uid, string Name)[] Tags);
+
+[MemoryPackable]
+[CommandManagerCommand(5)]
+public readonly partial record struct RemoveTags(Guid[] Tags);
+
+[MemoryPackable]
+[CommandManagerCommand(6)]
+public readonly partial record struct UpdateTags((Guid Uid, string Name)[] Tags);
+
+[MemoryPackable]
+[CommandManagerCommand(7)]
+public readonly partial record struct UpdateFormat(string? Format)
+    : ICreateUndoRedoParamCommand<(Personal personal, ITestOutputHelper output), UpdateFormat>
+{
+    public async ValueTask<(UpdateFormat undoParam, UpdateFormat redoParam)> CreateUndoRedoParam((Personal personal, ITestOutputHelper output) target)
+    {
+        var undoParam = new UpdateFormat(target.personal.Format);
+        
+        // テスト
+        await Task.Delay(TimeSpan.FromSeconds(1));
+        
+        target.output.WriteLine("CreateUndoRedoParam");
+        
+        return (undoParam, this);
+    }
+
+    public async ValueTask Undo((Personal personal, ITestOutputHelper output) target)
+    {
+        target.personal.Format = Format;
+        
+        // テスト
+        await Task.Delay(TimeSpan.FromSeconds(1));
+        
+        target.output.WriteLine("Undo");
+    }
+
+    public async ValueTask Redo((Personal personal, ITestOutputHelper output) target)
+    {
+        target.personal.Format = Format;
+        
+        // テスト
+        await Task.Delay(TimeSpan.FromSeconds(1));
+        
+        target.output.WriteLine("Redo");
+    }
+}
+
 public class UnitTest1
 {
     private readonly ITestOutputHelper _output;
@@ -141,6 +199,123 @@ public class UnitTest1
         // 定義に処理が含まれているが、対象の取得処理の登録が必要
         commandManager.RegisterExecuteCommand<UpdateName, (Personal personal, ITestOutputHelper output)>(() => (personal, _output));
         commandManager.RegisterUndoRedoCommand<UpdateClass, (Personal personal, ITestOutputHelper output)>(() => (personal, _output));
+        
+        // まずUndoRedoParamを作成して、その値を使ってUndoRedoする
+        commandManager.RegisterCommand<AddTags, Guid[], (Guid Uid, string Name)[]>(
+            async o =>
+            {
+                var undoParam = o.Tags
+                    .Select(oo => oo.Uid)
+                    .ToArray();
+                
+                // テスト
+                await Task.Delay(TimeSpan.FromSeconds(1));
+                
+                _output.WriteLine("Lambda:createUndoRedoParam");
+
+                return (undoParam, o.Tags);
+            },
+            async o =>
+            {
+                var targets = personal.Tags
+                    .Join(o, oo => oo.Uid, i => i, (oo, _) => oo)
+                    .ToArray();
+                
+                foreach (var target in targets)
+                {
+                    personal.Tags.Remove(target);
+                }
+                
+                // テスト
+                await Task.Delay(TimeSpan.FromSeconds(1));
+                
+                _output.WriteLine("Lambda:undo");
+            },
+            async o =>
+            {
+                var targets = o
+                    .Select(oo => new Tag
+                    {
+                        Uid = oo.Uid,
+                        Name = oo.Name,
+                    })
+                    .ToArray();
+                
+                personal.Tags.AddRange(targets);
+                
+                // テスト
+                await Task.Delay(TimeSpan.FromSeconds(1));
+                
+                _output.WriteLine("Lambda:redo");
+            });
+        
+        // まずUndoRedoParamを作成して、その値を使ってUndoRedoする（同期）
+        commandManager.RegisterCommand<RemoveTags, (Guid Uid, string Name)[], Guid[]>(
+            o =>
+            {
+                var undoParam = personal.Tags
+                    .Join(o.Tags, oo => oo.Uid, ii => ii, (oo, _) => (oo.Uid, oo.Name ?? string.Empty))
+                    .ToArray();
+                
+                _output.WriteLine("Lambda:createUndoRedoParam");
+
+                return (undoParam, o.Tags);
+            },
+            o =>
+            {
+                var targets = o
+                    .Select(oo => new Tag
+                    {
+                        Uid = oo.Uid,
+                        Name = oo.Name,
+                    })
+                    .ToArray();
+                
+                personal.Tags.AddRange(targets);
+                
+                _output.WriteLine("Lambda:undo");
+            },
+            o =>
+            {
+                var targets = personal.Tags
+                    .Join(o, oo => oo.Uid, i => i, (oo, _) => oo)
+                    .ToArray();
+                
+                foreach (var target in targets)
+                {
+                    personal.Tags.Remove(target);
+                }
+                
+                _output.WriteLine("Lambda:redo");
+            });
+
+        // まずUndoRedoParamを作成して、その値を使ってUndoRedoする（UndoRedo処理が同じ）
+        commandManager.RegisterCommand<UpdateTags, (Guid Uid, string Name)[]>(
+            o =>
+            {
+                var undoParam = o.Tags
+                    .Join(personal.Tags, oo => oo.Uid, ii => ii.Uid, (_, ii) => (ii.Uid, ii.Name ?? string.Empty))
+                    .ToArray();
+                
+                _output.WriteLine("Lambda:createUndoRedoParam");
+
+                return ValueTask.FromResult((undoParam, o.Tags));
+            },
+            o =>
+            {
+                foreach (var (tag, value) in personal.Tags
+                             .Join(o, oo => oo.Uid, ii => ii.Uid, (oo, ii) => (tag:oo, value:ii)))
+                {
+                    tag.Name = value.Name;
+                }
+                
+                _output.WriteLine("Lambda:undoRedo");
+                
+                return ValueTask.CompletedTask;
+            });
+        
+        commandManager.RegisterCreateUndoRedoParamCommand<UpdateFormat, (Personal personal, ITestOutputHelper output)>(() => (personal, _output));
+
 
         await commandManager.Execute(new UpdateAge(10));
         
@@ -157,6 +332,32 @@ public class UnitTest1
         await commandManager.Execute(new UpdateClass("testClass"));
         
         Assert.Equal("testClass", personal.Class);
+        
+        await commandManager.Execute(new AddTags(new []
+        {
+            (Guid.NewGuid(), "tag1"),
+            (Guid.NewGuid(), "tag2"),
+        }));
+        
+        Assert.Equal(new []{"tag1", "tag2"}, personal.Tags.Select(o => o.Name));
+
+        var updateTags = personal.Tags
+            .Select(o => (o.Uid, o.Name + "add"))
+            .ToArray();
+        await commandManager.Execute(new UpdateTags(updateTags));
+        
+        Assert.Equal(new []{"tag1add", "tag2add"}, personal.Tags.Select(o => o.Name));
+
+        var removeTags = personal.Tags
+            .Select(o => o.Uid)
+            .ToArray();
+        await commandManager.Execute(new RemoveTags(removeTags));
+        
+        Assert.Equal(Array.Empty<string>(), personal.Tags.Select(o => o.Name));
+        
+        await commandManager.Execute(new UpdateFormat("testFormat"));
+        
+        Assert.Equal("testFormat", personal.Format);
 
 
         // Undoコマンドをバックアップ
@@ -164,7 +365,22 @@ public class UnitTest1
         
         // Undoコマンドをシリアライズ
         var serializedBackupCommands = commandManager.SerializeCommands(backupCommands);
+        
+        await commandManager.Undo();
+        
+        Assert.Equal(default, personal.Format);
 
+        await commandManager.Undo();
+        
+        Assert.Equal(new []{"tag1add", "tag2add"}, personal.Tags.Select(o => o.Name));
+        
+        await commandManager.Undo();
+        
+        Assert.Equal(new []{"tag1", "tag2"}, personal.Tags.Select(o => o.Name));
+        
+        await commandManager.Undo();
+
+        Assert.Equal(Array.Empty<string>(), personal.Tags.Select(o => o.Name));
 
         await commandManager.Undo();
 
@@ -199,8 +415,39 @@ public class UnitTest1
         await commandManager.Redo();
 
         Assert.Equal("testClass", personal.Class);
+        
+        await commandManager.Redo();
+        
+        Assert.Equal(new []{"tag1", "tag2"}, personal.Tags.Select(o => o.Name));
 
+        await commandManager.Redo();
+        
+        Assert.Equal(new []{"tag1add", "tag2add"}, personal.Tags.Select(o => o.Name));
+        
+        await commandManager.Redo();
+        
+        Assert.Equal(Array.Empty<string>(), personal.Tags.Select(o => o.Name));
 
+        await commandManager.Redo();
+        
+        Assert.Equal("testFormat", personal.Format);
+        
+
+        await commandManager.Undo();
+        
+        Assert.Equal(default, personal.Format);
+        
+        await commandManager.Undo();
+
+        Assert.Equal(new []{"tag1add", "tag2add"}, personal.Tags.Select(o => o.Name));
+        
+        await commandManager.Undo();
+
+        Assert.Equal(new []{"tag1", "tag2"}, personal.Tags.Select(o => o.Name));
+        
+        await commandManager.Undo();
+        
+        Assert.Equal(Array.Empty<string>(), personal.Tags.Select(o => o.Name));
         
         await commandManager.Undo();
 
@@ -232,6 +479,26 @@ public class UnitTest1
         
         Assert.Equal("testClass", personal.Class);
         
+        Assert.Equal(Array.Empty<string>(), personal.Tags.Select(o => o.Name));
+        
+        Assert.Equal("testFormat", personal.Format);
+        
+        
+        await commandManager.Undo();
+        
+        Assert.Equal(default, personal.Format);
+        
+        await commandManager.Undo();
+
+        Assert.Equal(new []{"tag1add", "tag2add"}, personal.Tags.Select(o => o.Name));
+        
+        await commandManager.Undo();
+
+        Assert.Equal(new []{"tag1", "tag2"}, personal.Tags.Select(o => o.Name));
+        
+        await commandManager.Undo();
+        
+        Assert.Equal(Array.Empty<string>(), personal.Tags.Select(o => o.Name));
         
         await commandManager.Undo();
 
@@ -262,5 +529,9 @@ public class UnitTest1
         Assert.True(personal.IsRegistered);
         
         Assert.Equal("testClass", personal.Class);
+        
+        Assert.Equal(Array.Empty<string>(), personal.Tags.Select(o => o.Name));
+        
+        Assert.Equal("testFormat", personal.Format);
     }
 }

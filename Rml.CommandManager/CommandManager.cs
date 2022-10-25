@@ -4,10 +4,12 @@ using System.Threading.Tasks;
 
 namespace Rml.CommandManager;
 
+public delegate ValueTask<(ReadOnlyMemory<byte> undoParamBin, ReadOnlyMemory<byte> redoParamBin)> CreateUndoRedoParamDelegate(in ReadOnlySpan<byte> paramBin);
 public delegate ValueTask<ReadOnlyMemory<byte>> UndoRedoDelegate(in ReadOnlySpan<byte> paramBin);
 
-public readonly record struct CommandExecutor(UndoRedoDelegate Undo, UndoRedoDelegate Redo)
+public readonly record struct CommandExecutor(CreateUndoRedoParamDelegate? CreateUndoRedoParam, UndoRedoDelegate Undo, UndoRedoDelegate Redo)
 {
+    public readonly CreateUndoRedoParamDelegate? CreateUndoRedoParam = CreateUndoRedoParam;
     public readonly UndoRedoDelegate Undo = Undo;
     public readonly UndoRedoDelegate Redo = Redo;
 }
@@ -21,6 +23,13 @@ public interface IUndoRedoCommand<in TTarget, TParam>
 {
     public ValueTask<TParam> Undo(TTarget target);
     public ValueTask<TParam> Redo(TTarget target);
+}
+
+public interface ICreateUndoRedoParamCommand<in TTarget, TParam>
+{
+    public ValueTask<(TParam undoParam, TParam redoParam)> CreateUndoRedoParam(TTarget target);
+    public ValueTask Undo(TTarget target);
+    public ValueTask Redo(TTarget target);
 }
 
 public interface ICommand
@@ -47,14 +56,19 @@ public class CommandManagerCommandAttribute : Attribute
     }
 }
 
-public static class CommandManagerCommandAttributeGetter<T>
+public static class CommandManagerCommandCache<T>
 {
     // ReSharper disable once StaticMemberInGenericType
     public static readonly CommandManagerCommandAttribute? CommandManagerCommandAttribute;
+
+    // ReSharper disable once StaticMemberInGenericType
+    public static readonly string? Name;
     
-    static CommandManagerCommandAttributeGetter()
+    static CommandManagerCommandCache()
     {
-        CommandManagerCommandAttribute = Attribute.GetCustomAttribute(typeof(T), typeof(CommandManagerCommandAttribute)) as CommandManagerCommandAttribute;
+        var type = typeof(T);
+        CommandManagerCommandAttribute = Attribute.GetCustomAttribute(type, typeof(CommandManagerCommandAttribute)) as CommandManagerCommandAttribute;
+        Name = type.FullName;
     }
 }
 
@@ -64,6 +78,7 @@ where TCommand : ICommand, new()
     private readonly ICommandManagerSerializer _commandManagerSerializer;
     
     private readonly Dictionary<ushort, CommandExecutor> _commandExecutors = new Dictionary<ushort, CommandExecutor>();
+    private readonly Dictionary<ushort, string?> _commandNames = new Dictionary<ushort, string?>();
     private readonly Stack<TCommand> _undo = new Stack<TCommand>();
     private readonly Stack<TCommand> _redo = new Stack<TCommand>();
     
@@ -74,10 +89,102 @@ where TCommand : ICommand, new()
     {
         _commandManagerSerializer = commandManagerSerializer;
     }
+    
+    public void RegisterCommand<TExecuteParam, TUndoParam, TRedoParam>(
+        Func<TExecuteParam, ValueTask<(TUndoParam undoParam, TRedoParam redoParam)>> createUndoRedoParam,
+        Func<TUndoParam, ValueTask> undo,
+        Func<TRedoParam, ValueTask> redo)
+    {
+        var commandAttribute = CommandManagerCommandCache<TExecuteParam>.CommandManagerCommandAttribute;
+        if (commandAttribute is null)
+            throw new ArgumentException($"{nameof(TExecuteParam)}に{nameof(CommandManagerCommandAttribute)}を設定してください");
+
+        ValueTask<(ReadOnlyMemory<byte> undoParamBin, ReadOnlyMemory<byte> redoParamBin)> CreateUndoRedoParamDelegate(in ReadOnlySpan<byte> paramBin)
+        {
+            return Impl(_commandManagerSerializer.Deserialize<TExecuteParam>(paramBin) ?? throw new InvalidOperationException());
+
+            async ValueTask<(ReadOnlyMemory<byte> undoParamBin, ReadOnlyMemory<byte> redoParamBin)> Impl(TExecuteParam param)
+            {
+                var undoRedoParam = await createUndoRedoParam(param);
+                return (_commandManagerSerializer.Serialize(undoRedoParam.undoParam), _commandManagerSerializer.Serialize(undoRedoParam.redoParam));
+            }
+        }
+
+        ValueTask<ReadOnlyMemory<byte>> UndoDelegate(in ReadOnlySpan<byte> paramBin)
+        {
+            return Impl(_commandManagerSerializer.Deserialize<TUndoParam>(paramBin) ?? throw new InvalidOperationException());
+
+            async ValueTask<ReadOnlyMemory<byte>> Impl(TUndoParam param)
+            {
+                await undo(param);
+                return ReadOnlyMemory<byte>.Empty;
+            }
+        }
+
+        ValueTask<ReadOnlyMemory<byte>> RedoDelegate(in ReadOnlySpan<byte> paramBin)
+        {
+            return Impl(_commandManagerSerializer.Deserialize<TRedoParam>(paramBin) ?? throw new InvalidOperationException());
+
+            async ValueTask<ReadOnlyMemory<byte>> Impl(TRedoParam param)
+            {
+                await redo(param);
+                return ReadOnlyMemory<byte>.Empty;
+            }
+        }
+
+        _commandExecutors.Add(commandAttribute.Uid, new CommandExecutor(CreateUndoRedoParamDelegate, UndoDelegate, RedoDelegate));
+        _commandNames.Add(commandAttribute.Uid, CommandManagerCommandCache<TExecuteParam>.Name);
+    }
+    
+    public void RegisterCommand<TExecuteParam, TUndoParam, TRedoParam>(
+        Func<TExecuteParam, (TUndoParam undoParam, TRedoParam redoParam)> createUndoRedoParam,
+        Action<TUndoParam> undo,
+        Action<TRedoParam> redo)
+    {
+        var commandAttribute = CommandManagerCommandCache<TExecuteParam>.CommandManagerCommandAttribute;
+        if (commandAttribute is null)
+            throw new ArgumentException($"{nameof(TExecuteParam)}に{nameof(CommandManagerCommandAttribute)}を設定してください");
+
+        ValueTask<(ReadOnlyMemory<byte> undoParamBin, ReadOnlyMemory<byte> redoParamBin)> CreateUndoRedoParamDelegate(in ReadOnlySpan<byte> paramBin)
+        {
+            return Impl(_commandManagerSerializer.Deserialize<TExecuteParam>(paramBin) ?? throw new InvalidOperationException());
+
+            ValueTask<(ReadOnlyMemory<byte> undoParamBin, ReadOnlyMemory<byte> redoParamBin)> Impl(TExecuteParam param)
+            {
+                var undoRedoParam = createUndoRedoParam(param);
+                return ValueTask.FromResult((_commandManagerSerializer.Serialize(undoRedoParam.undoParam), _commandManagerSerializer.Serialize(undoRedoParam.redoParam)));
+            }
+        }
+
+        ValueTask<ReadOnlyMemory<byte>> UndoDelegate(in ReadOnlySpan<byte> paramBin)
+        {
+            return Impl(_commandManagerSerializer.Deserialize<TUndoParam>(paramBin) ?? throw new InvalidOperationException());
+
+            ValueTask<ReadOnlyMemory<byte>> Impl(TUndoParam param)
+            {
+                undo(param);
+                return ValueTask.FromResult(ReadOnlyMemory<byte>.Empty);
+            }
+        }
+
+        ValueTask<ReadOnlyMemory<byte>> RedoDelegate(in ReadOnlySpan<byte> paramBin)
+        {
+            return Impl(_commandManagerSerializer.Deserialize<TRedoParam>(paramBin) ?? throw new InvalidOperationException());
+
+            ValueTask<ReadOnlyMemory<byte>> Impl(TRedoParam param)
+            {
+                redo(param);
+                return ValueTask.FromResult(ReadOnlyMemory<byte>.Empty);
+            }
+        }
+
+        _commandExecutors.Add(commandAttribute.Uid, new CommandExecutor(CreateUndoRedoParamDelegate, UndoDelegate, RedoDelegate));
+        _commandNames.Add(commandAttribute.Uid, CommandManagerCommandCache<TExecuteParam>.Name);
+    }
 
     public void RegisterCommand<T>(Func<T, ValueTask<T>> undo, Func<T, ValueTask<T>> redo)
     {
-        var commandAttribute = CommandManagerCommandAttributeGetter<T>.CommandManagerCommandAttribute;
+        var commandAttribute = CommandManagerCommandCache<T>.CommandManagerCommandAttribute;
         if (commandAttribute is null)
             throw new ArgumentException($"{nameof(T)}に{nameof(CommandManagerCommandAttribute)}を設定してください");
 
@@ -103,12 +210,13 @@ where TCommand : ICommand, new()
             }
         }
 
-        _commandExecutors.Add(commandAttribute.Uid, new CommandExecutor(UndoDelegate, RedoDelegate));
+        _commandExecutors.Add(commandAttribute.Uid, new CommandExecutor(null, UndoDelegate, RedoDelegate));
+        _commandNames.Add(commandAttribute.Uid, CommandManagerCommandCache<T>.Name);
     }
 
     public void RegisterCommand<T>(Func<T, T> undo, Func<T, T> redo)
     {
-        var commandAttribute = CommandManagerCommandAttributeGetter<T>.CommandManagerCommandAttribute;
+        var commandAttribute = CommandManagerCommandCache<T>.CommandManagerCommandAttribute;
         if (commandAttribute is null)
             throw new ArgumentException($"{nameof(T)}に{nameof(CommandManagerCommandAttribute)}を設定してください");
 
@@ -124,7 +232,22 @@ where TCommand : ICommand, new()
             return ValueTask.FromResult(_commandManagerSerializer.Serialize(undoParam));
         }
 
-        _commandExecutors.Add(commandAttribute.Uid, new CommandExecutor(UndoDelegate, RedoDelegate));
+        _commandExecutors.Add(commandAttribute.Uid, new CommandExecutor(null, UndoDelegate, RedoDelegate));
+        _commandNames.Add(commandAttribute.Uid, CommandManagerCommandCache<T>.Name);
+    }
+
+    public void RegisterCommand<TExecuteParam, TUndoRedoParam>(
+        Func<TExecuteParam, ValueTask<(TUndoRedoParam undoParam, TUndoRedoParam redoParam)>> createUndoRedoParam,
+        Func<TUndoRedoParam, ValueTask> undoRedo)
+    {
+        RegisterCommand(createUndoRedoParam, undoRedo, undoRedo);
+    }
+    
+    public void RegisterCommand<TExecuteParam, TUndoRedoParam>(
+        Func<TExecuteParam, (TUndoRedoParam undoParam, TUndoRedoParam redoParam)> createUndoRedoParam,
+        Action<TUndoRedoParam> undoRedo)
+    {
+        RegisterCommand(createUndoRedoParam, undoRedo, undoRedo);
     }
 
     public void RegisterCommand<T>(Func<T, ValueTask<T>> undoRedo)
@@ -148,23 +271,48 @@ where TCommand : ICommand, new()
     {
         RegisterCommand<T>(o => o.Undo(getTargetFunc()), o => o.Redo(getTargetFunc()));
     }
-
-    public ValueTask Execute<T>(T param)
+    
+    public void RegisterCreateUndoRedoParamCommand<T, TTarget>(Func<TTarget> getTargetFunc)
+        where T : ICreateUndoRedoParamCommand<TTarget, T>
     {
-        var commandAttribute = CommandManagerCommandAttributeGetter<T>.CommandManagerCommandAttribute;
+        RegisterCommand<T, T, T>(o => o.CreateUndoRedoParam(getTargetFunc()), o => o.Undo(getTargetFunc()), o => o.Redo(getTargetFunc()));
+    }
+
+    public async ValueTask Execute<T>(T param)
+    {
+        var commandAttribute = CommandManagerCommandCache<T>.CommandManagerCommandAttribute;
         if (commandAttribute is null)
             throw new ArgumentException($"{nameof(T)}に{nameof(CommandManagerCommandAttribute)}を設定してください");
         
-        var command = new TCommand
+        var commandExecutor = _commandExecutors[commandAttribute.Uid];
+
+        TCommand command;
+        if (commandExecutor.CreateUndoRedoParam is not null)
         {
-            Uid = commandAttribute.Uid,
-            UndoParamBin = null,
-            RedoParamBin = _commandManagerSerializer.Serialize(param),
-        };
-        
+            var undoRedoParam =
+                await commandExecutor.CreateUndoRedoParam(_commandManagerSerializer.Serialize(param).Span);
+
+            command = new TCommand
+            {
+                Uid = commandAttribute.Uid,
+                UndoParamBin = undoRedoParam.undoParamBin,
+                RedoParamBin = undoRedoParam.redoParamBin,
+            };
+        }
+        // CreateUndoRedoParamしない場合はRedoParamとして使用
+        else
+        {
+            command = new TCommand
+            {
+                Uid = commandAttribute.Uid,
+                UndoParamBin = null,
+                RedoParamBin = _commandManagerSerializer.Serialize(param),
+            };
+        }
+
         _redo.Clear();
         
-        return Redo(command);
+        await Redo(command);
     }
 
 
@@ -186,7 +334,7 @@ where TCommand : ICommand, new()
         {
             Uid = command.Uid,
             UndoParamBin = command.UndoParamBin,
-            RedoParamBin = redoParamBin,
+            RedoParamBin = redoParamBin.IsEmpty ? command.RedoParamBin : redoParamBin,
         };
         
         _redo.Push(command);
@@ -200,11 +348,11 @@ where TCommand : ICommand, new()
     public async ValueTask Redo(TCommand command)
     {
         var undoParamBin = await _commandExecutors[command.Uid].Redo(command.RedoParamBin.Span);
-
+            
         command = new TCommand
         {
             Uid = command.Uid,
-            UndoParamBin = undoParamBin,
+            UndoParamBin = undoParamBin.IsEmpty ? command.UndoParamBin : undoParamBin,
             RedoParamBin = command.RedoParamBin,
         };
 
@@ -230,5 +378,10 @@ where TCommand : ICommand, new()
     public TCommand[]? DeserializeCommands(in ReadOnlySpan<byte> bin)
     {
         return _commandManagerSerializer.Deserialize<TCommand[]>(bin);
+    }
+
+    public string? GetCommandName(TCommand command)
+    {
+        return _commandNames[command.Uid];
     }
 }
