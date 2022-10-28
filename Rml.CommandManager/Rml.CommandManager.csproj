@@ -11,9 +11,8 @@
         <RepositoryUrl>https://github.com/ryo1988/Rml</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>0.1.0</Version>
+        <Version>0.3.0</Version>
         <Copyright>Copyright (c) ryo1988</Copyright>
-        <PackageVersion>0.2.0</PackageVersion>
     </PropertyGroup>
 
 </Project>
