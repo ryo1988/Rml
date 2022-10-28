@@ -3,6 +3,11 @@ using Xunit.Abstractions;
 
 namespace Rml.CommandManager.Test;
 
+public static class Define
+{
+    public static readonly TimeSpan TestDelay = TimeSpan.FromSeconds(0);
+}
+
 // 好きなシリアライザを使用
 public class CommandManagerSerializer : ICommandManagerSerializer
 {
@@ -20,9 +25,10 @@ public class CommandManagerSerializer : ICommandManagerSerializer
 [MemoryPackable]
 public readonly partial record struct Command : ICommand
 {
-    public ushort Uid { get; init; }
-    public ReadOnlyMemory<byte> UndoParamBin { get; init; }
-    public ReadOnlyMemory<byte> RedoParamBin { get; init; }
+    public short Uid { get; init; }
+    public ReadOnlyMemory<byte>? ParamBin { get; init; }
+    public ReadOnlyMemory<byte>? UndoParamBin { get; init; }
+    public ReadOnlyMemory<byte>? RedoParamBin { get; init; }
 }
 
 public class Tag
@@ -63,7 +69,7 @@ public readonly partial record struct UpdateName(string? Name) : IExecuteCommand
         target.personal.Name = Name;
     
         // テスト
-        await Task.Delay(TimeSpan.FromSeconds(1));
+        await Task.Delay(Define.TestDelay);
         
         target.output.WriteLine("Execute");
 
@@ -83,7 +89,7 @@ public readonly partial record struct UpdateClass(string? Class) : IUndoRedoComm
         target.personal.Class = Class;
     
         // テスト
-        await Task.Delay(TimeSpan.FromSeconds(1));
+        await Task.Delay(Define.TestDelay);
         
         target.output.WriteLine("Undo");
 
@@ -97,7 +103,7 @@ public readonly partial record struct UpdateClass(string? Class) : IUndoRedoComm
         target.personal.Class = Class;
 
         // テスト
-        await Task.Delay(TimeSpan.FromSeconds(1));
+        await Task.Delay(Define.TestDelay);
         
         target.output.WriteLine("Redo");
 
@@ -127,7 +133,7 @@ public readonly partial record struct UpdateFormat(string? Format)
         var undoParam = new UpdateFormat(target.personal.Format);
         
         // テスト
-        await Task.Delay(TimeSpan.FromSeconds(1));
+        await Task.Delay(Define.TestDelay);
         
         target.output.WriteLine("CreateUndoRedoParam");
         
@@ -139,7 +145,7 @@ public readonly partial record struct UpdateFormat(string? Format)
         target.personal.Format = Format;
         
         // テスト
-        await Task.Delay(TimeSpan.FromSeconds(1));
+        await Task.Delay(Define.TestDelay);
         
         target.output.WriteLine("Undo");
     }
@@ -149,7 +155,7 @@ public readonly partial record struct UpdateFormat(string? Format)
         target.personal.Format = Format;
         
         // テスト
-        await Task.Delay(TimeSpan.FromSeconds(1));
+        await Task.Delay(Define.TestDelay);
         
         target.output.WriteLine("Redo");
     }
@@ -169,7 +175,7 @@ public class UnitTest1
     {
         var personal = new Personal();
         
-        var commandManager = new CommandManager<Command>(new CommandManagerSerializer());
+        var commandManager = new CommandManager<Command>(new CommandManagerSerializer(), true);
         
         // 定義はパラメータのみなので、ここで処理の登録が必要
         commandManager.RegisterCommand<UpdateAge>(o =>
@@ -189,7 +195,7 @@ public class UnitTest1
             personal.IsRegistered = o.Value;
 
             // テスト
-            await Task.Delay(TimeSpan.FromSeconds(1));
+            await Task.Delay(Define.TestDelay);
             
             _output.WriteLine("Lambda Async");
             
@@ -209,7 +215,7 @@ public class UnitTest1
                     .ToArray();
                 
                 // テスト
-                await Task.Delay(TimeSpan.FromSeconds(1));
+                await Task.Delay(Define.TestDelay);
                 
                 _output.WriteLine("Lambda:createUndoRedoParam");
 
@@ -227,7 +233,7 @@ public class UnitTest1
                 }
                 
                 // テスト
-                await Task.Delay(TimeSpan.FromSeconds(1));
+                await Task.Delay(Define.TestDelay);
                 
                 _output.WriteLine("Lambda:undo");
             },
@@ -244,7 +250,7 @@ public class UnitTest1
                 personal.Tags.AddRange(targets);
                 
                 // テスト
-                await Task.Delay(TimeSpan.FromSeconds(1));
+                await Task.Delay(Define.TestDelay);
                 
                 _output.WriteLine("Lambda:redo");
             });
@@ -315,8 +321,9 @@ public class UnitTest1
             });
         
         commandManager.RegisterCreateUndoRedoParamCommand<UpdateFormat, (Personal personal, ITestOutputHelper output)>(() => (personal, _output));
-
-
+        
+        _output.WriteLine("---start execute---");
+        
         await commandManager.Execute(new UpdateAge(10));
         
         Assert.Equal(10, personal.Age);
@@ -358,13 +365,25 @@ public class UnitTest1
         await commandManager.Execute(new UpdateFormat("testFormat"));
         
         Assert.Equal("testFormat", personal.Format);
-
-
-        // Undoコマンドをバックアップ
-        var backupCommands = commandManager.UndoCommands.Reverse().ToArray();
         
+        _output.WriteLine("---end execute---");
+
+
+        // Undoコマンド（UndoRedoにのみ必要なデータをパラメータに持つコマンド、実行負荷：低、容量：大）をバックアップ
+        var backupUndoCommands = commandManager.UndoCommands.Reverse().ToArray();
+
         // Undoコマンドをシリアライズ
-        var serializedBackupCommands = commandManager.SerializeCommands(backupCommands);
+        var serializedBackupUndoCommands = commandManager.SerializeCommands(backupUndoCommands);
+        
+        
+        // Executedコマンド（UndoRedoコマンドを生成するのに必要なデータをパラメータに持つコマンド、実行負荷：高（UndoRedoコマンドを生成するため）、容量：小）をバックアップ
+        var backupExecuted1Commands = commandManager.ExecutedCommands.ToArray();
+        
+        // Executedコマンドをシリアライズ
+        var serializedBackupExecuted1Commands = commandManager.SerializeCommands(backupExecuted1Commands);
+        
+
+        _output.WriteLine("---start undo---");
         
         await commandManager.Undo();
         
@@ -398,8 +417,12 @@ public class UnitTest1
         
         Assert.Equal(0, personal.Age);
         
+        _output.WriteLine("---end undo---");
         
         
+        
+        _output.WriteLine("---start redo---");
+
         await commandManager.Redo();
         
         Assert.Equal(10, personal.Age);
@@ -432,6 +455,10 @@ public class UnitTest1
         
         Assert.Equal("testFormat", personal.Format);
         
+        _output.WriteLine("---end redo---");
+        
+
+        _output.WriteLine("---start undo---");
 
         await commandManager.Undo();
         
@@ -465,12 +492,23 @@ public class UnitTest1
         
         Assert.Equal(0, personal.Age);
         
+        _output.WriteLine("---end undo---");
+        
+        
+        // Executedコマンド（UndoRedoコマンドを生成するのに必要なデータをパラメータに持つコマンド、実行負荷：高（UndoRedoコマンドを生成するため）、容量：小）をバックアップ
+        var backupExecuted2Commands = commandManager.ExecutedCommands.ToArray();
+        
+        // Executedコマンドをシリアライズ
+        var serializedBackupExecuted2Commands = commandManager.SerializeCommands(backupExecuted2Commands);
+        
+
+        _output.WriteLine("---start backupUndoCommands---");
         
         // バックアップしたUndoコマンドを実行
         commandManager.ClearCommands();
-        await commandManager.ExecuteCommands(backupCommands);
+        await commandManager.ExecuteCommands(backupUndoCommands);
         
-        
+
         Assert.Equal(10, personal.Age);
         
         Assert.Equal("test", personal.Name);
@@ -516,10 +554,14 @@ public class UnitTest1
         
         Assert.Equal(0, personal.Age);
         
+        _output.WriteLine("---end backupUndoCommands---");
         
+        
+        _output.WriteLine("---start serializedBackupUndoCommands---");
+
         // シリアライズしたUndoコマンドをデシリアライズして実行
         commandManager.ClearCommands();
-        await commandManager.ExecuteCommands(commandManager.DeserializeCommands(serializedBackupCommands.Span) ?? throw new InvalidOperationException());
+        await commandManager.ExecuteCommands(commandManager.DeserializeCommands(serializedBackupUndoCommands.Span) ?? throw new InvalidOperationException());
         
         
         Assert.Equal(10, personal.Age);
@@ -533,5 +575,90 @@ public class UnitTest1
         Assert.Equal(Array.Empty<string>(), personal.Tags.Select(o => o.Name));
         
         Assert.Equal("testFormat", personal.Format);
+        
+        _output.WriteLine("---end serializedBackupUndoCommands---");
+
+
+        // 値を初期化
+        personal.Age = default;
+        personal.Name = default;
+        personal.Class = default;
+        personal.IsRegistered = default;
+        personal.Tags = new List<Tag>();
+        personal.Format = default;
+        
+        _output.WriteLine("---start serializedBackupExecuted1Commands---");
+        
+        // シリアライズしたExecutedコマンドをデシリアライズして実行
+        commandManager.ClearCommands();
+        await commandManager.ExecuteCommands(commandManager.DeserializeCommands(serializedBackupExecuted1Commands.Span) ?? throw new InvalidOperationException());
+        
+        Assert.Equal(10, personal.Age);
+        
+        Assert.Equal("test", personal.Name);
+        
+        Assert.True(personal.IsRegistered);
+        
+        Assert.Equal("testClass", personal.Class);
+        
+        Assert.Equal(Array.Empty<string>(), personal.Tags.Select(o => o.Name));
+        
+        Assert.Equal("testFormat", personal.Format);
+        
+        _output.WriteLine("---end serializedBackupExecuted1Commands---");
+        
+        
+        // 値を初期化
+        personal.Age = default;
+        personal.Name = default;
+        personal.Class = default;
+        personal.IsRegistered = default;
+        personal.Tags = new List<Tag>();
+        personal.Format = default;
+        
+        
+        _output.WriteLine("---start serializedBackupExecuted2Commands---");
+        
+        // シリアライズしたExecutedコマンドをデシリアライズして実行
+        commandManager.ClearCommands();
+        await commandManager.ExecuteCommands(commandManager.DeserializeCommands(serializedBackupExecuted2Commands.Span) ?? throw new InvalidOperationException());
+        
+        Assert.Equal(default, personal.Format);
+        
+        Assert.Equal(Array.Empty<string>(), personal.Tags.Select(o => o.Name));
+        
+        Assert.Equal(default, personal.Class);
+        
+        Assert.False(personal.IsRegistered);
+        
+        Assert.Equal(default, personal.Name);
+        
+        Assert.Equal(0, personal.Age);
+        
+        _output.WriteLine("---end serializedBackupExecuted2Commands---");
+
+
+        
+        _output.WriteLine("---start commandName1---");
+
+        foreach (var command in commandManager.DeserializeCommands(serializedBackupExecuted1Commands.Span) ?? throw new InvalidOperationException())
+        {
+            var commandName = commandManager.GetCommandName(command);
+            _output.WriteLine(commandName);
+        }
+        
+        _output.WriteLine("---end commandName1---");
+        
+        
+        
+        _output.WriteLine("---start commandName2---");
+
+        foreach (var command in commandManager.DeserializeCommands(serializedBackupExecuted2Commands.Span) ?? throw new InvalidOperationException())
+        {
+            var commandName = commandManager.GetCommandName(command);
+            _output.WriteLine(commandName);
+        }
+        
+        _output.WriteLine("---end commandName2---");
     }
 }
