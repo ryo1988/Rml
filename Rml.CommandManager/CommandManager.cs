@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Rml.CommandManager;
@@ -58,12 +60,31 @@ public class CommandManagerCommandAttribute : Attribute
         
         Uid = uid;
     }
+
+    public CommandManagerCommandAttribute(string unique)
+    {
+        Uid = CreateUid(unique);
+    }
+
+    public CommandManagerCommandAttribute()
+    {
+    }
+
+    public static short CreateUid(string? unique)
+    {
+        if (unique is null)
+            throw new ArgumentException($"{nameof(unique)} is null or empty");
+        
+        using var md5 = MD5.Create();
+        var hash = md5.ComputeHash(Encoding.UTF8.GetBytes(unique));
+        return BitConverter.ToInt16(hash, 0);
+    }
 }
 
 public static class CommandManagerCommandCache<T>
 {
     // ReSharper disable once StaticMemberInGenericType
-    public static readonly CommandManagerCommandAttribute? CommandManagerCommandAttribute;
+    public static readonly short Uid;
 
     // ReSharper disable once StaticMemberInGenericType
     public static readonly string? Name;
@@ -71,7 +92,15 @@ public static class CommandManagerCommandCache<T>
     static CommandManagerCommandCache()
     {
         var type = typeof(T);
-        CommandManagerCommandAttribute = Attribute.GetCustomAttribute(type, typeof(CommandManagerCommandAttribute)) as CommandManagerCommandAttribute;
+        var commandManagerCommandAttribute =
+            Attribute.GetCustomAttribute(type,
+                typeof(CommandManagerCommandAttribute)) as CommandManagerCommandAttribute;
+        if (commandManagerCommandAttribute is null)
+            throw new InvalidOperationException($"{typeof(CommandManagerCommandAttribute)} is null");
+
+        Uid = commandManagerCommandAttribute.Uid is 0
+            ? CommandManagerCommandAttribute.CreateUid(type.FullName)
+            : commandManagerCommandAttribute.Uid;
         Name = type.FullName;
     }
 }
@@ -112,9 +141,7 @@ where TCommand : ICommand, new()
         Func<TUndoParam, ValueTask> undo,
         Func<TRedoParam, ValueTask> redo)
     {
-        var commandAttribute = CommandManagerCommandCache<TExecuteParam>.CommandManagerCommandAttribute;
-        if (commandAttribute is null)
-            throw new ArgumentException($"{nameof(TExecuteParam)}に{nameof(CommandManagerCommandAttribute)}を設定してください");
+        var uid = CommandManagerCommandCache<TExecuteParam>.Uid;
 
         ValueTask<(ReadOnlyMemory<byte> undoParamBin, ReadOnlyMemory<byte> redoParamBin)> CreateUndoRedoParamDelegate(in ReadOnlySpan<byte> paramBin)
         {
@@ -149,8 +176,8 @@ where TCommand : ICommand, new()
             }
         }
 
-        _commandExecutors.Add(commandAttribute.Uid, new CommandExecutor(CreateUndoRedoParamDelegate, UndoDelegate, RedoDelegate));
-        _commandNames.Add(commandAttribute.Uid, CommandManagerCommandCache<TExecuteParam>.Name);
+        _commandExecutors.Add(uid, new CommandExecutor(CreateUndoRedoParamDelegate, UndoDelegate, RedoDelegate));
+        _commandNames.Add(uid, CommandManagerCommandCache<TExecuteParam>.Name);
     }
     
     public void RegisterCommand<TExecuteParam, TUndoParam, TRedoParam>(
@@ -158,9 +185,7 @@ where TCommand : ICommand, new()
         Action<TUndoParam> undo,
         Action<TRedoParam> redo)
     {
-        var commandAttribute = CommandManagerCommandCache<TExecuteParam>.CommandManagerCommandAttribute;
-        if (commandAttribute is null)
-            throw new ArgumentException($"{nameof(TExecuteParam)}に{nameof(CommandManagerCommandAttribute)}を設定してください");
+        var uid = CommandManagerCommandCache<TExecuteParam>.Uid;
 
         ValueTask<(ReadOnlyMemory<byte> undoParamBin, ReadOnlyMemory<byte> redoParamBin)> CreateUndoRedoParamDelegate(in ReadOnlySpan<byte> paramBin)
         {
@@ -195,15 +220,13 @@ where TCommand : ICommand, new()
             }
         }
 
-        _commandExecutors.Add(commandAttribute.Uid, new CommandExecutor(CreateUndoRedoParamDelegate, UndoDelegate, RedoDelegate));
-        _commandNames.Add(commandAttribute.Uid, CommandManagerCommandCache<TExecuteParam>.Name);
+        _commandExecutors.Add(uid, new CommandExecutor(CreateUndoRedoParamDelegate, UndoDelegate, RedoDelegate));
+        _commandNames.Add(uid, CommandManagerCommandCache<TExecuteParam>.Name);
     }
 
     public void RegisterCommand<T>(Func<T, ValueTask<T>> undo, Func<T, ValueTask<T>> redo)
     {
-        var commandAttribute = CommandManagerCommandCache<T>.CommandManagerCommandAttribute;
-        if (commandAttribute is null)
-            throw new ArgumentException($"{nameof(T)}に{nameof(CommandManagerCommandAttribute)}を設定してください");
+        var uid = CommandManagerCommandCache<T>.Uid;
 
         ValueTask<ReadOnlyMemory<byte>> UndoDelegate(in ReadOnlySpan<byte> paramBin)
         {
@@ -227,15 +250,13 @@ where TCommand : ICommand, new()
             }
         }
 
-        _commandExecutors.Add(commandAttribute.Uid, new CommandExecutor(null, UndoDelegate, RedoDelegate));
-        _commandNames.Add(commandAttribute.Uid, CommandManagerCommandCache<T>.Name);
+        _commandExecutors.Add(uid, new CommandExecutor(null, UndoDelegate, RedoDelegate));
+        _commandNames.Add(uid, CommandManagerCommandCache<T>.Name);
     }
 
     public void RegisterCommand<T>(Func<T, T> undo, Func<T, T> redo)
     {
-        var commandAttribute = CommandManagerCommandCache<T>.CommandManagerCommandAttribute;
-        if (commandAttribute is null)
-            throw new ArgumentException($"{nameof(T)}に{nameof(CommandManagerCommandAttribute)}を設定してください");
+        var uid = CommandManagerCommandCache<T>.Uid;
 
         ValueTask<ReadOnlyMemory<byte>> UndoDelegate(in ReadOnlySpan<byte> param)
         {
@@ -249,8 +270,8 @@ where TCommand : ICommand, new()
             return ValueTask.FromResult(_commandManagerSerializer.Serialize(undoParam));
         }
 
-        _commandExecutors.Add(commandAttribute.Uid, new CommandExecutor(null, UndoDelegate, RedoDelegate));
-        _commandNames.Add(commandAttribute.Uid, CommandManagerCommandCache<T>.Name);
+        _commandExecutors.Add(uid, new CommandExecutor(null, UndoDelegate, RedoDelegate));
+        _commandNames.Add(uid, CommandManagerCommandCache<T>.Name);
     }
 
     public void RegisterCommand<TExecuteParam, TUndoRedoParam>(
@@ -346,13 +367,11 @@ where TCommand : ICommand, new()
 
     public ValueTask Execute<T>(T param)
     {
-        var commandAttribute = CommandManagerCommandCache<T>.CommandManagerCommandAttribute;
-        if (commandAttribute is null)
-            throw new ArgumentException($"{nameof(T)}に{nameof(CommandManagerCommandAttribute)}を設定してください");
+        var uid = CommandManagerCommandCache<T>.Uid;
 
         var command = new TCommand
         {
-            Uid = commandAttribute.Uid,
+            Uid = uid,
             ParamBin = _commandManagerSerializer.Serialize(param),
         };
 
