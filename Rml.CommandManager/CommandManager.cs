@@ -112,8 +112,12 @@ where TCommand : ICommand, new()
     private const short RedoCommandUid = -2;
     
     private readonly ICommandManagerSerializer _commandManagerSerializer;
-    
-    private readonly Dictionary<short, CommandExecutor> _commandExecutors = new Dictionary<short, CommandExecutor>();
+
+    private readonly Dictionary<short, CommandExecutor> _commandExecutors = new Dictionary<short, CommandExecutor>
+    {
+        { UndoCommandUid, new CommandExecutor() },
+        { RedoCommandUid, new CommandExecutor() },
+    };
 
     private readonly Dictionary<short, string?> _commandNames = new Dictionary<short, string?>
     {
