@@ -26,7 +26,7 @@ namespace Rml
         /// <param name="value"></param>
         /// <param name="destinationType"></param>
         /// <returns></returns>
-#if NET6_0
+#if NET6_0_OR_GREATER
         public override object? ConvertTo(ITypeDescriptorContext? context, CultureInfo? culture, object? value, Type destinationType)
 #else
         public override object? ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object? value, Type destinationType)
@@ -57,7 +57,7 @@ namespace Rml
         /// <param name="culture"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-#if NET6_0
+#if NET6_0_OR_GREATER
         public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
 #else
         public override object? ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
