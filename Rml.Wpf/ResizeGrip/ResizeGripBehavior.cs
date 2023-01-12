@@ -26,6 +26,15 @@ namespace Rml.Wpf.ResizeGrip
             set { SetValue(IsDraggingProperty, value); }
         }
 
+        public static readonly DependencyProperty IsEnabledProperty = DependencyProperty.Register(
+            nameof(IsEnabled), typeof(bool), typeof(ResizeGripBehavior), new PropertyMetadata(true));
+
+        public bool IsEnabled
+        {
+            get { return (bool)GetValue(IsEnabledProperty); }
+            set { SetValue(IsEnabledProperty, value); }
+        }
+
         /// <inheritdoc />
         protected override void OnAttached()
         {
@@ -53,6 +62,11 @@ namespace Rml.Wpf.ResizeGrip
             {
                 Source = this,
                 Mode = BindingMode.OneWayToSource,
+            });
+            adorner.SetBinding(UIElement.IsEnabledProperty, new Binding(nameof(IsEnabled))
+            {
+                Source = this,
+                Mode = BindingMode.TwoWay,
             });
             layer.Add(adorner);
         }
