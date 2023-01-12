@@ -2,14 +2,14 @@
 
     <PropertyGroup>
       <UseWPF>true</UseWPF>
-      <TargetFrameworks>net5.0-windows;net6.0-windows;netcoreapp3.1</TargetFrameworks>
+      <TargetFrameworks>net5.0-windows;net6.0-windows;net7.0-windows;netcoreapp3.1</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="DotNetProjects.PrintEngine" Version="2.0.3" />
       <PackageReference Include="Extended.Wpf.Toolkit" Version="3.8.2" />
       <PackageReference Include="ReactiveProperty" Version="8.1.2" />
-      <PackageReference Include="System.Runtime.Caching" Version="6.0.0" />
+      <PackageReference Include="System.Runtime.Caching" Version="7.0.0" />
     </ItemGroup>
 
 </Project>
