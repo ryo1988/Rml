@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Windows;
 using Prism.Services.Dialogs;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
@@ -23,6 +24,8 @@ namespace Rml.Wpf.DialogService
         /// 
         /// </summary>
         public object Content { get; private set; }
+        
+        public ReactiveCommand CopyToClipboardCommand { get; }
 
         /// <summary>
         /// 
@@ -35,6 +38,20 @@ namespace Rml.Wpf.DialogService
         public int DefaultIndex { get; private set; }
 
         private CompositeDisposable _cd;
+
+        public ConfirmationControlViewModel()
+        {
+            CopyToClipboardCommand = new ReactiveCommand().AddTo(Cd);
+            CopyToClipboardCommand
+                .Subscribe(_ =>
+                {
+                    var choices = Choices?
+                        .Select(o => o.Label)
+                        .ToArray() ?? Array.Empty<string>();
+                    Clipboard.SetText($"{Title}{Environment.NewLine}{Content}{Environment.NewLine}[{string.Join("][", choices)}]");
+                })
+                .AddTo(Cd);
+        }
 
         /// <inheritdoc />
         public bool CanCloseDialog()

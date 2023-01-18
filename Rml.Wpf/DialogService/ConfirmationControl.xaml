@@ -35,6 +35,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <ScrollViewer
             Grid.Row="0"
@@ -43,9 +44,14 @@
             VerticalScrollBarVisibility="Auto">
             <ContentPresenter Content="{Binding Content}" Focusable="False" />
         </ScrollViewer>
+        <Button
+            Grid.Row="1"
+            Margin="25,0,25,25"
+            Command="{Binding CopyToClipboardCommand}"
+            Content="Copy to clipboard" />
         <ItemsControl
             x:Name="ButtonList"
-            Grid.Row="1"
+            Grid.Row="2"
             Margin="25,0,25,25"
             HorizontalAlignment="Center"
             BorderThickness="0"

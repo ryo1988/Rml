@@ -25,6 +25,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <ScrollViewer
             Grid.Row="0"
@@ -34,8 +35,13 @@
             <ContentPresenter Content="{Binding Content}" />
         </ScrollViewer>
         <Button
-            x:Name="OkButton"
             Grid.Row="1"
+            Margin="25,0,25,25"
+            Command="{Binding CopyToClipboardCommand}"
+            Content="Copy to clipboard" />
+        <Button
+            x:Name="OkButton"
+            Grid.Row="2"
             Margin="25,0,25,25"
             Command="{Binding OkCommand}"
             Content="OK" />

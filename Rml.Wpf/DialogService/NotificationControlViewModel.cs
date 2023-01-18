@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows;
 using Prism.Services.Dialogs;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
@@ -20,6 +21,8 @@ namespace Rml.Wpf.DialogService
         /// 
         /// </summary>
         public object Content { get; private set; }
+        
+        public ReactiveCommand CopyToClipboardCommand { get; }
 
         /// <summary>
         /// 
@@ -29,6 +32,14 @@ namespace Rml.Wpf.DialogService
         /// <inheritdoc />
         public NotificationControlViewModel()
         {
+            CopyToClipboardCommand = new ReactiveCommand().AddTo(Cd);
+            CopyToClipboardCommand
+                .Subscribe(_ =>
+                {
+                    Clipboard.SetText($"{Title}{Environment.NewLine}{Content}");
+                })
+                .AddTo(Cd);
+            
             OkCommand = new ReactiveCommand().AddTo(Cd);
             OkCommand
                 .Subscribe(_ => RequestClose(new DialogResult(ButtonResult.OK)))
