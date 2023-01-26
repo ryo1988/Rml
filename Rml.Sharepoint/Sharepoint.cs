@@ -215,8 +215,19 @@ namespace Rml.Sharepoint
                     var currentFolder = await GetEntity(folder, pathItem) as Folder;
                     if (currentFolder is null)
                     {
-                        currentFolder = await folder.CreateFolderAsync(pathItem);
-                        await ClearEntityCache(folder);
+                        try
+                        {
+                            currentFolder = await folder.CreateFolderAsync(pathItem);
+                            await ClearEntityCache(folder);
+                        }
+                        catch
+                        {
+                            // Cacheが古い可能性があるのでCacheクリア
+                            await ClearEntityCache(folder);
+                            currentFolder = await GetEntity(folder, pathItem) as Folder;
+                            if (currentFolder is null)
+                                throw;
+                        }
                     }
 
                     folder = currentFolder;
@@ -235,9 +246,20 @@ namespace Rml.Sharepoint
                 file = await GetEntity(fileFolder, fileName) as File;
                 if (createWhenNotExist && file is null)
                 {
-                    await using var stream = new MemoryStream();
-                    file = await fileFolder.UploadFileAsync(fileName, stream, false);
-                    await ClearEntityCache(fileFolder);
+                    try
+                    {
+                        await using var stream = new MemoryStream();
+                        file = await fileFolder.UploadFileAsync(fileName, stream, false);
+                        await ClearEntityCache(fileFolder);
+                    }
+                    catch
+                    {
+                        // Cacheが古い可能性があるのでCacheクリア
+                        await ClearEntityCache(folder);
+                        file = await GetEntity(fileFolder, fileName) as File;
+                        if (file is null)
+                            throw;
+                    }
                 }
             }
 
