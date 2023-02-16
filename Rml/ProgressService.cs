@@ -115,6 +115,10 @@ namespace Rml
         /// </summary>
         /// <returns></returns>
         public Progress Create(string label, bool isCancelable, int max = 0);
+
+        public void Create<T>(Func<Progress, Task<T>> asyncFunc, string label, bool isCancelable, int max = 0);
+        public void Create(Func<Progress, ValueTask> asyncFunc, string label, bool isCancelable, int max = 0);
+        public void Create<T>(Func<Progress, ValueTask<T>> asyncFunc, string label, bool isCancelable, int max = 0);
     }
 
     /// <summary>
@@ -170,6 +174,24 @@ namespace Rml
                 _progresses.Add(progress);
             
             return progress;
+        }
+
+        public async void Create<T>(Func<Progress, Task<T>> asyncFunc, string label, bool isCancelable, int max = 0)
+        {
+            using var progress = Create(label, isCancelable, max);
+            await asyncFunc(progress);
+        }
+        
+        public async void Create(Func<Progress, ValueTask> asyncFunc, string label, bool isCancelable, int max = 0)
+        {
+            using var progress = Create(label, isCancelable, max);
+            await asyncFunc(progress);
+        }
+        
+        public async void Create<T>(Func<Progress, ValueTask<T>> asyncFunc, string label, bool isCancelable, int max = 0)
+        {
+            using var progress = Create(label, isCancelable, max);
+            await asyncFunc(progress);
         }
     }
 }
