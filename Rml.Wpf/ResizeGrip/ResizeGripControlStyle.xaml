@@ -1,0 +1,21 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:resizeGrip="clr-namespace:Rml.Wpf.ResizeGrip">
+    <Style TargetType="{x:Type resizeGrip:ResizeGripControl}">
+        <Setter Property="ResizeGripWidth" Value="18" />
+        <Setter Property="ResizeGripHeight" Value="18" />
+        <Setter Property="ResizeGripTemplate">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Grid Margin="2">
+                        <Path Fill="White" Data="M0,14L14,0L14,14z" />
+                        <Path Stroke="LightGray" Data="M0,14L14,0" />
+                        <Path Stroke="LightGray" Data="M4,14L14,4" />
+                        <Path Stroke="LightGray" Data="M8,14L14,8" />
+                        <Path Stroke="LightGray" Data="M12,14L14,12" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>
