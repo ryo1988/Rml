@@ -144,7 +144,7 @@ public class ResizeGripControl : Border
         {
             _resizeGrip = new Thumb {Cursor = Cursors.SizeNWSE};
             _resizeGrip.DragDelta += ResizeGripOnDragDelta;
-            _resizeGrip.MouseDoubleClick += ResizeGripOnMouseDoubleClick;
+            _resizeGrip.PreviewMouseDoubleClick += ResizeGripOnPreviewMouseDoubleClick;
             _resizeGrip.DragStarted += ResizeGripOnDragStarted;
             _resizeGrip.DragCompleted += ResizeGripOnDragCompleted;
             _resizeGrip.HorizontalAlignment = HorizontalAlignment.Right;
@@ -184,7 +184,7 @@ public class ResizeGripControl : Border
             frameworkElement.SetValue(HeightProperty, height);
         }
 
-        private void ResizeGripOnMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void ResizeGripOnPreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             var frameworkElement = TargetElement ?? throw new InvalidOperationException();
 
@@ -199,6 +199,8 @@ public class ResizeGripControl : Border
                 frameworkElement.SetValue(HeightProperty, double.NaN);
             }
             IsDragging = false;
+
+            e.Handled = true;
         }
 
         private void ResizeGripOnDragStarted(object sender, DragStartedEventArgs e)
