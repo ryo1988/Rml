@@ -46,8 +46,13 @@ public static class ScrollBarOptimizer
         bar.ApplyTemplate();
 
         foreach (var button in GetVisualDescendants(bar).OfType<ButtonBase>())
+        {
+            if (button.Command is AlwaysExecutableRoutedCommand)
+                continue;
+            
             // スクロール対象がない場合はスクロールバー自体無効化されるので、使っているボタンは常に実行可能にしてRoutedEventsの発生を抑制
             button.Command = new AlwaysExecutableRoutedCommand((RoutedCommand)button.Command, button);
+        }
     }
 
     private static IEnumerable<DependencyObject> GetVisualDescendants(DependencyObject target)
