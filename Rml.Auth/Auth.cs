@@ -21,7 +21,7 @@ namespace Rml.Auth
             {
                 publicClientApplication = PublicClientApplicationBuilder
                     .Create(clientId)
-                    .WithDefaultRedirectUri()
+                    .WithRedirectUri("http://localhost")
                     .WithAuthority(AzureCloudInstance.AzurePublic, tenantId)
                     .Build();
 
