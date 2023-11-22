@@ -123,9 +123,7 @@ public static class DataObjectHelper
         public struct FileDescriptor
         {
             [StructLayout(LayoutKind.Sequential, Size = 260, Pack = 1)]
-            private struct FileNameType
-            {
-            }
+            private struct FileNameType;
 
             [FieldOffset(4 + 16 + 8 + 8 + 4 + 8 + 8 + 8 + 4 + 4)]
             private FileNameType cFileName;

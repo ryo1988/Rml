@@ -8,9 +8,7 @@ namespace Rml.Wpf.Behavior;
 
 public class CloseWindowBehavior : EventAggregatorBehavior<FrameworkElement>
 {
-    public class CloseWindowEvent : PubSubEvent
-    {
-    }
+    public class CloseWindowEvent : PubSubEvent;
 
     protected override IDisposable Subscribe()
     {

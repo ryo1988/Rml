@@ -9,16 +9,10 @@ using Microsoft.AppCenter.Crashes;
 namespace Rml.AppCenter
 {
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-    public class TrackEventAttribute : Attribute
-    {
-
-    }
+    public class TrackEventAttribute : Attribute;
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-    public class TrackEventPropertyAttribute : Attribute
-    {
-
-    }
+    public class TrackEventPropertyAttribute : Attribute;
 
     public class AnalyticsCrashesService
     {

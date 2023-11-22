@@ -60,7 +60,7 @@ namespace Rml
 #if NET6_0_OR_GREATER
         public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
 #else
-        public override object? ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        public override object? ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object? value)
 #endif
         {
             if (value is string description)

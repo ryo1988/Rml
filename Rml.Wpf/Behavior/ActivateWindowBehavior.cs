@@ -8,9 +8,7 @@ namespace Rml.Wpf.Behavior;
 
 public class ActivateWindowBehavior : EventAggregatorBehavior<FrameworkElement>
 {
-    public class ActivateWindowEvent : PubSubEvent
-    {
-    }
+    public class ActivateWindowEvent : PubSubEvent;
 
     protected override IDisposable Subscribe()
     {
