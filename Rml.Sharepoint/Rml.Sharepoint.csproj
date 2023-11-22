@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.SharePointOnline.CSOM" Version="16.1.24009.12000" />
+      <PackageReference Include="Microsoft.SharePointOnline.CSOM" Version="16.1.24301.12000" />
       <PackageReference Include="Nito.AsyncEx" Version="5.1.2" />
       <PackageReference Include="PnP.Framework" Version="1.13.0" />
     </ItemGroup>
