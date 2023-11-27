@@ -19,6 +19,6 @@ namespace Rml
         /// 
         /// </summary>
         /// <returns></returns>
-        IObservable<TResponse> ObserveResponse();
+        IObservable<TResponse?> ObserveResponse();
     }
 }

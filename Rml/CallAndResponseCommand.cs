@@ -29,8 +29,8 @@ namespace Rml
     public class CallAndResponseCommand<TCall, TResponse> : Disposable, IObserveCallAndResponseCommand<TCall, TResponse>
     {
         private readonly Subject<TCall> _callTrigger;
-        private readonly Subject<TResponse> _responseTrigger;
-        private readonly List<Func<TCall, CancellationToken?, ValueTask<TResponse>>> _callAndResponses = new ();
+        private readonly Subject<TResponse?> _responseTrigger;
+        private readonly List<Func<TCall, CancellationToken?, ValueTask<TResponse?>>> _callAndResponses = new ();
         private readonly AsyncLock? _asyncLock;
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace Rml
         public CallAndResponseCommand(bool isParallelExecute = false)
         {
             _callTrigger = new Subject<TCall>().AddTo(Cd);
-            _responseTrigger = new Subject<TResponse>().AddTo(Cd);
+            _responseTrigger = new Subject<TResponse?>().AddTo(Cd);
             _asyncLock = isParallelExecute ? null : new AsyncLock();
             System.Reactive.Disposables.Disposable.Create(() =>
             {
@@ -56,9 +56,9 @@ namespace Rml
         /// <param name="args"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public ValueTask<TResponse[]> ExecuteAsync(in TCall args, CancellationToken? token)
+        public ValueTask<TResponse?[]> ExecuteAsync(in TCall args, CancellationToken? token)
         {
-            Func<TCall, CancellationToken?, ValueTask<TResponse>>[] callAndResponses;
+            Func<TCall, CancellationToken?, ValueTask<TResponse?>>[] callAndResponses;
             lock (this)
             {
                 callAndResponses = _callAndResponses.ToArray();
@@ -73,9 +73,9 @@ namespace Rml
         /// </summary>
         /// <param name="callAndResponse"></param>
         /// <returns></returns>
-        public IDisposable Subscribe(Func<TCall, CancellationToken?, ValueTask<TResponse>> callAndResponse)
+        public IDisposable Subscribe(Func<TCall, CancellationToken?, ValueTask<TResponse?>> callAndResponse)
         {
-            var task = new Func<TCall, CancellationToken?, ValueTask<TResponse>>(async (call, token) =>
+            var task = new Func<TCall, CancellationToken?, ValueTask<TResponse?>>(async (call, token) =>
             {
                 if (_asyncLock is null)
                 {
@@ -87,7 +87,7 @@ namespace Rml
                     return await Do();
                 }
 
-                async ValueTask<TResponse> Do()
+                async ValueTask<TResponse?> Do()
                 {
                     _callTrigger.OnNext(call);
                     var response = await callAndResponse(call, token).ConfigureAwait(true);
@@ -117,7 +117,7 @@ namespace Rml
         }
 
         /// <inheritdoc />
-        public IObservable<TResponse> ObserveResponse()
+        public IObservable<TResponse?> ObserveResponse()
         {
             return _responseTrigger;
         }
