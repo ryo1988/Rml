@@ -176,12 +176,6 @@ public class ResizeGripControl : Border
             frameworkElement.SetValue(WidthProperty, width);
             frameworkElement.SetValue(HeightProperty, height);
             frameworkElement.UpdateLayout();
-
-            var contentBounds = VisualTreeHelper.GetDescendantBounds(frameworkElement);
-            width = System.Math.Max(contentBounds.Right, width);
-            height = System.Math.Max(contentBounds.Bottom, height);
-            frameworkElement.SetValue(WidthProperty, width);
-            frameworkElement.SetValue(HeightProperty, height);
         }
 
         private void ResizeGripOnPreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
