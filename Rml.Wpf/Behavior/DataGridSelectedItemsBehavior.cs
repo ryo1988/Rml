@@ -67,7 +67,13 @@ namespace Rml.Wpf.Behavior
         /// 
         /// </summary>
         public static readonly DependencyProperty ElementTypeProperty = DependencyProperty.Register(
-            "ElementType", typeof(Type), typeof(DataGridSelectedItemsBehavior), new PropertyMetadata(default(Type)));
+            "ElementType", typeof(Type), typeof(DataGridSelectedItemsBehavior), new PropertyMetadata(default(Type), ElementPropertyChanged));
+
+        private static void ElementPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var self = (DataGridSelectedItemsBehavior)d;
+            self.UpdateSelectedItems();
+        }
 
         /// <summary>
         /// 
@@ -98,6 +104,17 @@ namespace Rml.Wpf.Behavior
 
         private void AssociatedObjectOnSelectionChanged(object s, SelectionChangedEventArgs e)
         {
+            UpdateSelectedItems();
+        }
+        
+        private void UpdateSelectedItems()
+        {
+            if (AssociatedObject is null)
+                return;
+            
+            if (ElementType is null)
+                return;
+            
             if (_internalUpdating)
             {
                 return;
