@@ -26,6 +26,15 @@ namespace Rml
                 .Do(o => action(o.OldItem))
                 .Select(o => o.NewItem);
         }
+        
+        public static IObservable<T> DoBeforeNotNull<T>(this IObservable<T> observable, Action<T?> action, T? initialValue = default)
+        {
+            return observable
+                .StartWith(initialValue)
+                .Pairwise()
+                .Do(o => action(o.OldItem))
+                .Select(o => o.NewItem ?? throw new InvalidOperationException());
+        }
 
         /// <summary>
         /// 
