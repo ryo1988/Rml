@@ -8,12 +8,20 @@
             <Setter.Value>
                 <ControlTemplate>
                     <Grid Margin="2">
-                        <Path Fill="White" Data="M0,14L14,0L14,14z" />
-                        <Path Stroke="LightGray" Data="M0,14L14,0" />
-                        <Path Stroke="LightGray" Data="M4,14L14,4" />
-                        <Path Stroke="LightGray" Data="M8,14L14,8" />
-                        <Path Stroke="LightGray" Data="M12,14L14,12" />
+                        <Path Fill="Transparent" Data="M0,14L14,0L14,14z" />
+                        <Path x:Name="Stoke1" Visibility="Hidden" Stroke="DimGray" Data="M0,14L14,0" />
+                        <Path x:Name="Stoke2" Visibility="Hidden" Stroke="LightGray" Data="M4,14L14,4" />
+                        <Path x:Name="Stoke3" Visibility="Hidden" Stroke="DimGray" Data="M8,14L14,8" />
+                        <Path x:Name="Stoke4" Visibility="Hidden" Stroke="LightGray" Data="M12,14L14,12" />
                     </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Stoke1" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="Stoke2" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="Stoke3" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="Stoke4" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
