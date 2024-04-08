@@ -161,8 +161,8 @@ public class ResizeGripControl : Border
 
             var frameworkElement = TargetElement ?? throw new InvalidOperationException();
 
-            var width = frameworkElement.Width.Equals(double.NaN) ? frameworkElement.DesiredSize.Width : frameworkElement.ActualWidth;
-            var height = frameworkElement.Height.Equals(double.NaN) ? frameworkElement.DesiredSize.Height : frameworkElement.ActualHeight;
+            var width = frameworkElement.ActualWidth.Equals(double.NaN) ? frameworkElement.DesiredSize.Width : frameworkElement.ActualWidth;
+            var height = frameworkElement.ActualHeight.Equals(double.NaN) ? frameworkElement.DesiredSize.Height : frameworkElement.ActualHeight;
 
             width += e.HorizontalChange;
             height += e.VerticalChange;
@@ -210,12 +210,10 @@ public class ResizeGripControl : Border
         /// <inheritdoc />
         protected override Size ArrangeOverride(Size finalSize)
         {
-            var frameworkElement = TargetElement ?? throw new InvalidOperationException();
-
-            var width = _resizeGrip.Width;
-            var height = _resizeGrip.Height;
-            var x = frameworkElement.ActualWidth - width;
-            var y = frameworkElement.ActualHeight - height;
+            var width = _resizeGrip.ActualWidth;
+            var height = _resizeGrip.ActualHeight;
+            var x = ActualWidth - width;
+            var y = ActualHeight - height;
 
             _resizeGrip.Arrange(new Rect(x, y, width, height));
 
