@@ -7,7 +7,7 @@ namespace Rml.Wpf.Behavior
     /// <summary>
     /// Ctrl+ホイールでFontSizeを調整します
     /// </summary>
-    public class ItemsControlZoomBehavior : Behavior<ItemsControl>
+    public class ControlZoomBehavior : Behavior<Control>
     {
         /// <inheritdoc />
         protected override void OnAttached()
