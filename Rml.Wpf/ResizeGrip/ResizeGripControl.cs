@@ -131,6 +131,15 @@ public class ResizeGripControl : Border
             set { SetValue(TargetElementProperty, value); }
         }
 
+        public static readonly DependencyProperty IsVisibleGridProperty = DependencyProperty.Register(
+            nameof(IsVisibleGrid), typeof(bool), typeof(ResizeGripControl), new PropertyMetadata(true));
+
+        public bool IsVisibleGrid
+        {
+            get { return (bool)GetValue(IsVisibleGridProperty); }
+            set { SetValue(IsVisibleGridProperty, value); }
+        }
+
         private readonly Thumb _resizeGrip;
         private readonly VisualCollection _visualChildren;
 

@@ -15,12 +15,14 @@
                         <Path x:Name="Stoke4" Visibility="Hidden" Stroke="LightGray" Data="M12,14L14,12" />
                     </Grid>
                     <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
+                        <DataTrigger
+                            Binding="{Binding IsVisibleGrid, RelativeSource={RelativeSource AncestorType=resizeGrip:ResizeGripControl}}"
+                            Value="True">
                             <Setter TargetName="Stoke1" Property="Visibility" Value="Visible" />
                             <Setter TargetName="Stoke2" Property="Visibility" Value="Visible" />
                             <Setter TargetName="Stoke3" Property="Visibility" Value="Visible" />
                             <Setter TargetName="Stoke4" Property="Visibility" Value="Visible" />
-                        </Trigger>
+                        </DataTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
