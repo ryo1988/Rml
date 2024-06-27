@@ -123,15 +123,16 @@ namespace Rml.Sharepoint
 
             using (useLock ? await ClientContextLocks[file.Context].LockAsync() : Disposable.Create(null))
             {
-                file.Context.Load(file, o => o.CheckedOutByUser);
+                file.Context.Load(file, o => o.CheckOutType);
                 await file.Context.ExecuteQueryRetryAsync();
             }
 
-            return file.CheckedOutByUser.ServerObjectIsNull switch
+            return file.CheckOutType switch
             {
-                false => true,
-                true => false,
-                _ => throw new InvalidOperationException(),
+                CheckOutType.None => false,
+                CheckOutType.Offline => true,
+                CheckOutType.Online => true,
+                _ => throw new InvalidOperationException()
             };
         }
 
