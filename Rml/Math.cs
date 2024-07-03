@@ -109,5 +109,20 @@ namespace Rml
 
             return base36.ToString();
         }
+
+        public static double CalculateAngle((double x, double y) p1, (double x, double y) p2)
+        {
+            var deltaX = p2.x - p1.x;
+            var deltaY = p2.y - p1.y;
+
+            return System.Math.Atan2(deltaY, deltaX) * (180.0 / System.Math.PI);
+        }
+        
+        public static double FindThirdSide(double a, double b, double angleC)
+        {
+            var angleCRadians = angleC * (System.Math.PI / 180);
+            var c = System.Math.Sqrt(a * a + b * b - 2 * a * b * System.Math.Cos(angleCRadians));
+            return c;
+        }
     }
 }
