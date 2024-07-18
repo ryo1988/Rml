@@ -18,7 +18,7 @@ namespace Rml.SharpDx
             var axis = Vector3.Cross(aFrom, aTo);
             if (System.Math.Abs(axis.Length()) < 0.000001)
                 axis = Vector3.UnitY;
-            var angle = Vector3Helper.Angle(aFrom, aTo);
+            var angle = Vector3Util.Angle(aFrom, aTo);
             return Quaternion.RotationAxis(Vector3.Normalize(axis), angle);
         }
     }

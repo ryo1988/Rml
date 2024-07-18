@@ -6,7 +6,7 @@ namespace Rml.SharpDx
     /// <summary>
     /// 
     /// </summary>
-    public static class Vector3Helper
+    public static class Vector3Util
     {
         private const float EpsilonNormalSqrt = 1e-15f;
 
