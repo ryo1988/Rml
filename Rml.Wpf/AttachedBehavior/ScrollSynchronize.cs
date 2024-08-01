@@ -135,14 +135,33 @@ namespace Rml.Wpf.AttachedBehavior
         {
             return (bool) element.GetValue(EnableHorizontalProperty);
         }
+        
+        public static readonly DependencyProperty IgnoreLoadedBeforeScrollProperty = DependencyProperty.RegisterAttached(
+            "IgnoreLoadedBeforeScroll", typeof(bool), typeof(ScrollSynchronize), new PropertyMetadata(false));
+        
+        public static void SetIgnoreLoadedBeforeScroll(DependencyObject element, bool value)
+        {
+            element.SetValue(IgnoreLoadedBeforeScrollProperty, value);
+        }
+        
+        public static bool GetIgnoreLoadedBeforeScroll(DependencyObject element)
+        {
+            return (bool) element.GetValue(IgnoreLoadedBeforeScrollProperty);
+        }
 
         private static void ScrollViewerOnScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             var scrollViewer = (ScrollViewer)sender;
             var group = Groups[scrollViewer];
-            ScrollViewers[group].ForEach(o => o.ScrollChanged -= ScrollViewerOnScrollChanged);
+            var scrollViewers = ScrollViewers[group];
+            // ロード前にスクロール位置を初期位置に戻そうとされる場合に対処
+            if (GetIgnoreLoadedBeforeScroll(scrollViewer) && scrollViewer.IsLoaded is false)
+            {
+                scrollViewer = scrollViewers.FirstOrDefault(o => o != scrollViewer) ?? scrollViewer;
+            }
+            scrollViewers.ForEach(o => o.ScrollChanged -= ScrollViewerOnScrollChanged);
             SyncScroll(group, scrollViewer, e.HorizontalChange != 0.0, e.VerticalChange != 0.0);
-            ScrollViewers[group].ForEach(o => o.ScrollChanged += ScrollViewerOnScrollChanged);
+            scrollViewers.ForEach(o => o.ScrollChanged += ScrollViewerOnScrollChanged);
         }
 
         private static void SyncScroll(string group, ScrollViewer scrollViewer, bool isHorizontal, bool isVertical)
