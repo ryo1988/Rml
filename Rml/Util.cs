@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Rml
 {
@@ -42,7 +43,10 @@ namespace Rml
             if (directoryInfo.Exists is false)
                 throw new DirectoryNotFoundException(fromPath);
 
-            Directory.CreateDirectory(toPath);
+            if (Directory.Exists(toPath) is false)
+            {
+                Directory.CreateDirectory(toPath);
+            }
 
             foreach (var fileInfo in directoryInfo.GetFiles())
             {
@@ -58,6 +62,45 @@ namespace Rml
             {
                 var toDirectoryPath = Path.Combine(toPath, directory.Name);
                 CopyDirectory(directory.FullName, toDirectoryPath, copySubDirectory, overwrite);
+            }
+        }
+        
+        public static async Task CopyDirectoryAsync(string fromPath, string toPath, bool copySubDirectory, bool overwrite)
+        {
+            var directoryInfo = new DirectoryInfo(fromPath);
+            if (directoryInfo.Exists is false)
+                throw new DirectoryNotFoundException(fromPath);
+
+            if (Directory.Exists(toPath) is false)
+            {
+                Directory.CreateDirectory(toPath);
+            }
+            
+            foreach (var fileInfo in directoryInfo.GetFiles())
+            {
+                var toFilePath = Path.Combine(toPath, fileInfo.Name);
+                if (overwrite || File.Exists(toFilePath) is false)
+                {
+                    await CopyFile(fileInfo.FullName, toFilePath);
+                }
+            }
+            
+            if (copySubDirectory is false)
+                return;
+            
+            foreach (var directory in directoryInfo.GetDirectories())
+            {
+                var toDirectoryPath = Path.Combine(toPath, directory.Name);
+                await CopyDirectoryAsync(directory.FullName, toDirectoryPath, copySubDirectory, overwrite);
+            }
+            
+            return;
+
+            static async Task CopyFile(string fromPath, string toPath)
+            {
+                using var fromStream = new FileStream(fromPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096, true);
+                using var toStream = new FileStream(toPath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true);
+                await fromStream.CopyToAsync(toStream);
             }
         }
 
