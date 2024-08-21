@@ -58,7 +58,7 @@ namespace Rml.Wpf.DialogService
         /// <param name="choices"></param>
         /// <param name="defaultIndex"></param>
         /// <returns></returns>
-        public static int Contirmation(this IDialogService dialogService, string title, object content, object[] choices, int defaultIndex)
+        public static int Confirmation(this IDialogService dialogService, string title, object content, object[] choices, int defaultIndex)
         {
             var result = -1;
             InvokeUiThread(() => dialogService.ShowDialog(nameof(ConfirmationControl), new ConfirmationDialogParameters(title, content, choices, defaultIndex),
