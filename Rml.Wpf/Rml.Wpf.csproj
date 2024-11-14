@@ -3,7 +3,7 @@
     <PropertyGroup>
         <UseWPF>true</UseWPF>
         <Nullable>disable</Nullable>
-        <TargetFrameworks>net5.0-windows;net6.0-windows;net7.0-windows;net472;net8.0-windows</TargetFrameworks>
+        <TargetFrameworks>net5.0-windows;net6.0-windows;net7.0-windows;net472;net8.0-windows;net9.0-windows</TargetFrameworks>
         <AssemblyVersion>0.6.1.0</AssemblyVersion>
         <FileVersion>0.6.1.0</FileVersion>
     </PropertyGroup>
