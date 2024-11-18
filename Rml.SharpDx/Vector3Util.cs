@@ -26,6 +26,14 @@ namespace Rml.SharpDx
             return (float)System.Math.Acos(dot);
         }
         
+        public static float SignedAngle(Vector3 from, Vector3 to, Vector3 axis)
+        {
+            var unsignedAngle = Angle(from, to);
+
+            var sign = System.Math.Sign(Vector3.Dot(axis, Vector3.Cross(from, to)));
+            return unsignedAngle * sign;
+        }
+        
         /// <summary>
         /// 
         /// </summary>
