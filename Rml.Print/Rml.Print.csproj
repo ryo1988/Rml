@@ -9,7 +9,7 @@
       <PackageReference Include="DotNetProjects.PrintEngine" Version="2.0.3" />
       <PackageReference Include="Extended.Wpf.Toolkit" Version="3.8.2" />
       <PackageReference Include="ReactiveProperty" Version="9.3.4" />
-      <PackageReference Include="System.Runtime.Caching" Version="8.0.1" />
+      <PackageReference Include="System.Runtime.Caching" Version="9.0.0" />
     </ItemGroup>
 
 </Project>
