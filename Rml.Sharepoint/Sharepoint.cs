@@ -26,7 +26,7 @@ namespace Rml.Sharepoint
         private static readonly Dictionary<Folder, Dictionary<string, ClientObject>> EntityCache = new();
         private static readonly Dictionary<ClientObject, Folder> EntityFolderCache = new();
 
-        private static async ValueTask<Dictionary<string, ClientObject>> GetEntitiesInternal(Folder folder, bool useLock)
+        private static async ValueTask<Dictionary<string, ClientObject>> GetEntitiesInternalAsync(Folder folder, bool useLock)
         {
             using (useLock ? await EntityCacheLock.LockAsync() : Disposable.Create(null))
             {
@@ -55,16 +55,16 @@ namespace Rml.Sharepoint
             }
         }
         
-        private static async ValueTask<ClientObject?> GetEntity(Folder folder, string name)
+        private static async ValueTask<ClientObject?> GetEntityAsync(Folder folder, string name)
         {
             using (await EntityCacheLock.LockAsync())
             {
-                var entities = await GetEntitiesInternal(folder, false);
+                var entities = await GetEntitiesInternalAsync(folder, false);
                 return entities.TryGetValue(name, out var entity) ? entity : null;
             }
         }
 
-        private static async ValueTask ClearEntityCache(ClientObject clientObject)
+        private static async ValueTask ClearEntityCacheAsync(ClientObject clientObject)
         {
             using (await EntityCacheLock.LockAsync())
             {
@@ -100,7 +100,7 @@ namespace Rml.Sharepoint
             }
         }
 
-        public static async ValueTask ClearEntityCache()
+        public static async ValueTask ClearEntityCacheAsync()
         {
             var disposables = await ClientContextLocks
                 .Select(async o => await o.Value.LockAsync())
@@ -116,7 +116,7 @@ namespace Rml.Sharepoint
             }
         }
 
-        private static async ValueTask<bool> IsLocked(File? file, bool useLock)
+        private static async ValueTask<bool> IsLockedAsync(File? file, bool useLock)
         {
             if (file is null)
                 return false;
@@ -136,14 +136,14 @@ namespace Rml.Sharepoint
             };
         }
 
-        private static async ValueTask UpdateLockedFile(File file, bool useLock)
+        private static async ValueTask UpdateLockedFileAsync(File file, bool useLock)
         {
             using (useLock ? await ClientContextLocks[file.Context].LockAsync() : Disposable.Create(null))
             {
                 file.CheckIn("", CheckinType.MajorCheckIn);
                 file.CheckOut();
                 await file.Context.ExecuteQueryRetryAsync();
-                await ClearEntityCache(file);
+                await ClearEntityCacheAsync(file);
             }
         }
         
@@ -177,7 +177,7 @@ namespace Rml.Sharepoint
             }
         }
 
-        public static async ValueTask<Folder?> GetRootFolder(ClientContext clientContext, bool forceCheckOut)
+        public static async ValueTask<Folder?> GetRootFolderAsync(ClientContext clientContext, bool forceCheckOut)
         {
             using (await RootFoldersLock.LockAsync())
             {
@@ -205,7 +205,7 @@ namespace Rml.Sharepoint
             }
         }
 
-        public static async ValueTask<(Folder fileFolder, string fileName)> GetPathFolderAndFileName(Folder folder, string path)
+        public static async ValueTask<(Folder fileFolder, string fileName)> GetPathFolderAndFileNameAsync(Folder folder, string path)
         {
             var fileName = path.Split('\\', '/').TakeLast(1).Single();
             var folderPaths = path.Split('\\', '/').SkipLast(1);
@@ -213,19 +213,19 @@ namespace Rml.Sharepoint
             {
                 using (await ClientContextLocks[folder.Context].LockAsync())
                 {
-                    var currentFolder = await GetEntity(folder, pathItem) as Folder;
+                    var currentFolder = await GetEntityAsync(folder, pathItem) as Folder;
                     if (currentFolder is null)
                     {
                         try
                         {
                             currentFolder = await folder.CreateFolderAsync(pathItem);
-                            await ClearEntityCache(folder);
+                            await ClearEntityCacheAsync(folder);
                         }
                         catch
                         {
                             // Cacheが古い可能性があるのでCacheクリア
-                            await ClearEntityCache(folder);
-                            currentFolder = await GetEntity(folder, pathItem) as Folder;
+                            await ClearEntityCacheAsync(folder);
+                            currentFolder = await GetEntityAsync(folder, pathItem) as Folder;
                             if (currentFolder is null)
                                 throw;
                         }
@@ -240,24 +240,24 @@ namespace Rml.Sharepoint
 
         public static async ValueTask<File?> GetFileAsync(Folder folder, string path, bool createWhenNotExist)
         {
-            var (fileFolder, fileName) = await GetPathFolderAndFileName(folder, path);
+            var (fileFolder, fileName) = await GetPathFolderAndFileNameAsync(folder, path);
             File? file;
             using (await ClientContextLocks[folder.Context].LockAsync())
             {
-                file = await GetEntity(fileFolder, fileName) as File;
+                file = await GetEntityAsync(fileFolder, fileName) as File;
                 if (createWhenNotExist && file is null)
                 {
                     try
                     {
                         await using var stream = new MemoryStream();
                         file = await fileFolder.UploadFileAsync(fileName, stream, false);
-                        await ClearEntityCache(fileFolder);
+                        await ClearEntityCacheAsync(fileFolder);
                     }
                     catch
                     {
                         // Cacheが古い可能性があるのでCacheクリア
-                        await ClearEntityCache(folder);
-                        file = await GetEntity(fileFolder, fileName) as File;
+                        await ClearEntityCacheAsync(folder);
+                        file = await GetEntityAsync(fileFolder, fileName) as File;
                         if (file is null)
                             throw;
                     }
@@ -267,21 +267,26 @@ namespace Rml.Sharepoint
             return file;
         }
         
-        public static async ValueTask DeleteFile(Folder folder, string path)
+        public static async ValueTask DeleteFileAsync(Folder folder, File file)
         {
-            var getFile = await GetFileAsync(folder, path, false);
-            if (getFile is null)
-                return;
             using (await ClientContextLocks[folder.Context].LockAsync())
             {
-                getFile.DeleteObject();
-                await getFile.Context.ExecuteQueryRetryAsync();
-                await ClearEntityCache(folder);
-                await ClearEntityCache(getFile);
+                file.DeleteObject();
+                await file.Context.ExecuteQueryRetryAsync();
+                await ClearEntityCacheAsync(folder);
+                await ClearEntityCacheAsync(file);
             }
         }
+        
+        public static async ValueTask DeleteFileAsync(Folder folder, string path)
+        {
+            var file = await GetFileAsync(folder, path, false);
+            if (file is null)
+                return;
+            await DeleteFileAsync(folder, file);
+        }
 
-        public static async ValueTask<Stream> PullFileStream(File file)
+        public static async ValueTask<Stream> PullFileStreamAsync(File file)
         {
             var memoryStream = new MemoryStream();
             ClientResult<Stream> openBinaryStream;
@@ -299,25 +304,25 @@ namespace Rml.Sharepoint
             return memoryStream;
         }
 
-        public static async ValueTask<File> PushFileStream(Folder folder, string path, Stream stream)
+        public static async ValueTask<File> PushFileStreamAsync(Folder folder, string path, Stream stream)
         {
-            var (fileFolder, fileName) = await GetPathFolderAndFileName(folder, path);
+            var (fileFolder, fileName) = await GetPathFolderAndFileNameAsync(folder, path);
             File? uploadFile;
             using (await ClientContextLocks[folder.Context].LockAsync())
             {
                 uploadFile = await fileFolder.UploadFileAsync(fileName, stream, true);
-                if (await IsLocked(uploadFile, false))
+                if (await IsLockedAsync(uploadFile, false))
                 {
-                    await UpdateLockedFile(uploadFile, false);
+                    await UpdateLockedFileAsync(uploadFile, false);
                 }
-                await ClearEntityCache(fileFolder);
+                await ClearEntityCacheAsync(fileFolder);
             }
             if (uploadFile is null) throw new InvalidOperationException();
 
             return uploadFile;
         }
 
-        public static async ValueTask<Folder> CreateFolder(Folder folder, string path)
+        public static async ValueTask<Folder> CreateFolderAsync(Folder folder, string path)
         {
             var folderPaths = path.Split('\\', '/');
 
@@ -325,11 +330,11 @@ namespace Rml.Sharepoint
             {
                 using (await ClientContextLocks[folder.Context].LockAsync())
                 {
-                    var currentFolder = await GetEntity(folder, pathItem) as Folder;
+                    var currentFolder = await GetEntityAsync(folder, pathItem) as Folder;
                     if (currentFolder is null)
                     {
                         currentFolder = await folder.CreateFolderAsync(pathItem);
-                        await ClearEntityCache(folder);
+                        await ClearEntityCacheAsync(folder);
                     }
 
                     folder = currentFolder;
@@ -339,50 +344,57 @@ namespace Rml.Sharepoint
             return folder;
         }
 
-        public static async ValueTask<Folder?> GetFolder(Folder folder, string path)
+        public static async ValueTask<Folder?> GetFolderAsync(Folder folder, string path)
         {
             var folderPaths = path.Split('\\', '/');
 
             var currentFolder = folder;
             foreach (var pathItem in folderPaths)
             {
-                currentFolder = await GetEntity(currentFolder, pathItem) as Folder;
+                using (await ClientContextLocks[folder.Context].LockAsync())
+                {
+                    currentFolder = await GetEntityAsync(currentFolder, pathItem) as Folder;
 
-                if (currentFolder is null)
-                    break;
+                    if (currentFolder is null)
+                        break;
+                }
             }
 
             return currentFolder;
         }
         
-        public static async ValueTask DeleteFolder(Folder folder, string path)
+        public static async ValueTask DeleteFolderAsync(Folder parentFolder, Folder folder)
         {
-            var getFolder = await GetFolder(folder, path);
-            if (getFolder is null)
-                return;
-            
             using (await ClientContextLocks[folder.Context].LockAsync())
             {
-                getFolder.DeleteObject();
-                await getFolder.Context.ExecuteQueryRetryAsync();
-                await ClearEntityCache(folder);
+                folder.DeleteObject();
+                await folder.Context.ExecuteQueryRetryAsync();
+                await ClearEntityCacheAsync(parentFolder);
             }
         }
-
-        public static async ValueTask<string[]> GetEntities(Folder folder)
+        
+        public static async ValueTask DeleteFolderAsync(Folder parentFolder, string path)
         {
-            return (await GetEntitiesInternal(folder, true))
+            var folder = await GetFolderAsync(parentFolder, path);
+            if (folder is null)
+                return;
+            await DeleteFolderAsync(parentFolder, folder);
+        }
+
+        public static async ValueTask<string[]> GetEntitiesAsync(Folder folder)
+        {
+            return (await GetEntitiesInternalAsync(folder, true))
                 .Select(o => o.Key)
                 .ToArray();
         }
 
-        public static async ValueTask<bool> IsLocked(Folder folder, string path)
+        public static async ValueTask<bool> IsLockedAsync(Folder folder, string path)
         {
             var file = await GetFileAsync(folder, path, false);
-            return await IsLocked(file, true);
+            return await IsLockedAsync(file, true);
         }
 
-        public static async ValueTask<bool> Lock(Folder folder, string path, bool force)
+        public static async ValueTask<bool> LockAsync(Folder folder, string path, bool force)
         {
             var file = await GetFileAsync(folder, path, true);
             if (file is null)
@@ -402,13 +414,13 @@ namespace Rml.Sharepoint
                 {
                     return false;
                 }
-                await ClearEntityCache(file);
+                await ClearEntityCacheAsync(file);
             }
 
             return true;
         }
         
-        public static async ValueTask<bool> Unlock(Folder folder, string path)
+        public static async ValueTask<bool> UnlockAsync(Folder folder, string path)
         {
             var file = await GetFileAsync(folder, path, false);
             if (file is null)
@@ -425,13 +437,13 @@ namespace Rml.Sharepoint
                 {
                     return false;
                 }
-                await ClearEntityCache(file);
+                await ClearEntityCacheAsync(file);
             }
 
             return true;
         }
 
-        public static async ValueTask<string?> GetLockedInfo(Folder folder, string path)
+        public static async ValueTask<string?> GetLockedInfoAsync(Folder folder, string path)
         {
             var file = await GetFileAsync(folder, path, true);
             if (file is null)
