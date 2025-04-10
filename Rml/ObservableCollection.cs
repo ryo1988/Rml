@@ -56,5 +56,26 @@ namespace Rml
             _suppressNotification = false;
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
+        
+        /// <summary>
+        /// 全ての要素を削除後にNotifyCollectionChangedAction.Resetを行います
+        /// </summary>
+        /// <param name="list"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public void RemoveRange(IEnumerable<T> list)
+        {
+            if (list is null)
+                throw new ArgumentNullException(nameof(list));
+
+            _suppressNotification = true;
+
+            foreach (var item in list)
+            {
+                Remove(item);
+            }
+
+            _suppressNotification = false;
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+        }
     }
 }
