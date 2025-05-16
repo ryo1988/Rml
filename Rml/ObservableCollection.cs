@@ -45,16 +45,23 @@ namespace Rml
         {
             if (list is null)
                 throw new ArgumentNullException(nameof(list));
+            
+            var changed = false;
 
             _suppressNotification = true;
 
             foreach (var item in list)
             {
                 Add(item);
+                changed = true;
             }
 
             _suppressNotification = false;
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+
+            if (changed)
+            {
+                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            }
         }
         
         /// <summary>
@@ -66,16 +73,23 @@ namespace Rml
         {
             if (list is null)
                 throw new ArgumentNullException(nameof(list));
+            
+            var changed = false;
 
             _suppressNotification = true;
 
             foreach (var item in list)
             {
                 Remove(item);
+                changed = true;
             }
 
             _suppressNotification = false;
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+
+            if (changed)
+            {
+                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            }
         }
     }
 }
