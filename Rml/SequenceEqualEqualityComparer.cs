@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+
+#if NET6_0_OR_GREATER
+#else
 using System.Linq;
+#endif
 
 namespace Rml
 {
