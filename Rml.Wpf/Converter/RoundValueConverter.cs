@@ -44,7 +44,7 @@ namespace Rml.Wpf.Converter
         /// <returns>使用しません</returns>
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            return Binding.DoNothing;
         }
     }
 }
