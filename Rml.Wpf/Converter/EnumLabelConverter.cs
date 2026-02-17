@@ -84,7 +84,7 @@ namespace Rml.Wpf.Converter
             var index = 0;
             foreach (var arrayValue in array)
             {
-                var converter = Converters.FirstOrDefault(o => o.From.Equals(arrayValue));
+                var converter = Converters.FirstOrDefault(o => o.From?.Equals(arrayValue) ?? arrayValue is null);
                 if (converter == null)
                 {
                     result[index++] = new EnumLabel(arrayValue, arrayValue.ToString());

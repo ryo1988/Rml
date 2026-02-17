@@ -8,6 +8,8 @@ namespace Rml.Wpf.MarkupExtension
     public class EnumValuesExtension : System.Windows.Markup.MarkupExtension
     {
         private readonly Type _enumType;
+        
+        public bool IncludeNull { get; set; }
 
         /// <summary>
         /// 
@@ -28,12 +30,15 @@ namespace Rml.Wpf.MarkupExtension
             var actualEnumType = Nullable.GetUnderlyingType(_enumType) ?? _enumType;
             var enumValues = Enum.GetValues(actualEnumType);
 
-            if (actualEnumType == _enumType)
+            if (IncludeNull is false && actualEnumType == _enumType)
                 return enumValues;
 
-            var tempArray = Array.CreateInstance(actualEnumType, enumValues.Length + 1);
-            enumValues.CopyTo(tempArray, 1);
-            return enumValues;
+            var tempArray = Array.CreateInstance(typeof(Nullable<>).MakeGenericType(actualEnumType), enumValues.Length + 1);
+            for (int i = 0; i < enumValues.Length; i++)
+            {
+                tempArray.SetValue(enumValues.GetValue(i), i + 1);
+            }
+            return tempArray;
         }
     }
 }
