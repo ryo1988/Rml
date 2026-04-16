@@ -2,49 +2,97 @@
 using System.Reactive.Concurrency;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Threading;
 using Reactive.Bindings;
 
-namespace Rml.Wpf
+namespace Rml.Wpf;
+
+/// <summary>
+/// 
+/// </summary>
+public static class UiDispatcherSchedulerHelper
 {
+    private static object GetFieldValue(Type type, object instance, string fieldName)
+    {
+        var bindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+                        | BindingFlags.Static;
+        var field = type.GetField(fieldName, bindFlags);
+        return field?.GetValue(instance);
+    }
+
     /// <summary>
     /// 
     /// </summary>
-    public static class UiDispatcherSchedulerHelper
+    /// <param name="action"></param>
+    public static void ScheduleUiDispatcher(Action action)
     {
-        private static object GetFieldValue(Type type, object instance, string fieldName)
+        var isSchedulerCreated = (bool)GetFieldValue(typeof(UIDispatcherScheduler), null, "IsSchedulerCreated");
+        if (isSchedulerCreated || SynchronizationContext.Current != null)
         {
-            var bindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
-                                     | BindingFlags.Static;
-            var field = type.GetField(fieldName, bindFlags);
-            return field?.GetValue(instance);
+            UIDispatcherScheduler.Default.Schedule(action);
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="action"></param>
-        public static void ScheduleUiDispatcher(Action action)
+        else
         {
-            var isSchedulerCreated = (bool)GetFieldValue(typeof(UIDispatcherScheduler), null, "IsSchedulerCreated");
-            if (isSchedulerCreated || SynchronizationContext.Current != null)
+            var thread = new Thread(() =>
             {
+                var dispatcherSynchronizationContext = new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher);
+                SynchronizationContext.SetSynchronizationContext(dispatcherSynchronizationContext);
+
                 UIDispatcherScheduler.Default.Schedule(action);
-            }
-            else
+
+                Dispatcher.Run();
+            });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+        }
+    }
+
+    public static Task<T> ScheduleUiDispatcherAsync<T>(Func<Task<T>> action)
+    {
+        var tcs = new TaskCompletionSource<T>();
+
+        void Run()
+        {
+            try
             {
-                var thread = new Thread(() =>
+                var task = action();
+                task.ContinueWith(t =>
                 {
-                    var dispatcherSynchronizationContext = new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher);
-                    SynchronizationContext.SetSynchronizationContext(dispatcherSynchronizationContext);
-
-                    UIDispatcherScheduler.Default.Schedule(action);
-
-                    Dispatcher.Run();
-                });
-                thread.SetApartmentState(ApartmentState.STA);
-                thread.Start();
+                    if (t.IsFaulted)
+                        tcs.SetException(t.Exception!.InnerException ?? t.Exception!);
+                    else if (t.IsCanceled)
+                        tcs.SetCanceled();
+                    else
+                        tcs.SetResult(t.Result);
+                }, TaskScheduler.Default);
+            }
+            catch (Exception ex)
+            {
+                tcs.SetException(ex);
             }
         }
+
+        var isSchedulerCreated = (bool)GetFieldValue(typeof(UIDispatcherScheduler), null, "IsSchedulerCreated");
+        if (isSchedulerCreated || SynchronizationContext.Current != null)
+        {
+            UIDispatcherScheduler.Default.Schedule(Run);
+        }
+        else
+        {
+            var thread = new Thread(() =>
+            {
+                var dispatcherSynchronizationContext = new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher);
+                SynchronizationContext.SetSynchronizationContext(dispatcherSynchronizationContext);
+
+                UIDispatcherScheduler.Default.Schedule(Run);
+
+                Dispatcher.Run();
+            });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+        }
+
+        return tcs.Task;
     }
 }
