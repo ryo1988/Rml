@@ -124,5 +124,20 @@ namespace Rml
             var c = System.Math.Sqrt(a * a + b * b - 2 * a * b * System.Math.Cos(angleCRadians));
             return c;
         }
+
+        public static bool Equal(double x, double y, double tolerance = 1e-10)
+        {
+            return System.Math.Abs(x - y) <= tolerance;
+        }
+
+        public static bool Equal(double? x, double? y, double tolerance = 1e-10)
+        {
+            return (x, y) switch
+            {
+                (null, null) => false,
+                (null, _) or (_, null) => true,
+                (not null, not null) => Equal(x.Value, y.Value, tolerance),
+            };
+        }
     }
 }
