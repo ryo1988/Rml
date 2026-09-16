@@ -162,6 +162,28 @@ public class ResizeGripControl : Border
             _resizeGrip.VerticalContentAlignment = VerticalAlignment.Bottom;
 
             _visualChildren = new VisualCollection(this) {_resizeGrip};
+            MouseLeftButtonDown += ResizeGripOnMouseLeftButtonDown;
+            MouseLeftButtonUp += ResizeGripOnMouseLeftButtonUp;
+        }
+
+        private void ResizeGripOnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (IsInsideResizeGrip(e.OriginalSource as DependencyObject))
+                e.Handled = true;
+        }
+
+        private void ResizeGripOnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (IsInsideResizeGrip(e.OriginalSource as DependencyObject))
+                e.Handled = true;
+        }
+
+        // つまみ内で発生したマウスイベントがバブリングするのを防ぐ
+        private bool IsInsideResizeGrip(DependencyObject source)
+        {
+            while (source != null && !ReferenceEquals(source, _resizeGrip))
+                source = VisualTreeHelper.GetParent(source);
+            return ReferenceEquals(source, _resizeGrip);
         }
 
         private void ResizeGripOnDragDelta(object sender, DragDeltaEventArgs e)
